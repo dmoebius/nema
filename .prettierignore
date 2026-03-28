@@ -1,0 +1,15 @@
+# Build output
+dist/
+node_modules/
+
+# Agent / IDE directories
+.agents/
+.idea/
+.junie/
+.vscode/*
+
+# Serwist generated files
+public/sw*
+public/swe-worker*
+
+pnpm-lock.yaml
