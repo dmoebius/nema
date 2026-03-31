@@ -13,7 +13,7 @@ interface ContactsState {
 
   // Actions
   loadContacts: () => Promise<void>;
-  addContact: (data: ContactFormData) => Promise<Contact>;
+  addContact: (data: ContactFormData, id?: string) => Promise<Contact>;
   updateContact: (id: string, data: ContactFormData) => Promise<void>;
   removeContact: (id: string) => Promise<void>;
   setSearchQuery: (query: string) => void;
@@ -45,11 +45,11 @@ export const useContactsStore = create<ContactsState>((set, get) => ({
     }
   },
 
-  addContact: async (data) => {
+  addContact: async (data, id?) => {
     const now = new Date().toISOString();
     const contact: Contact = {
       ...data,
-      id: uuidv4(),
+      id: id ?? uuidv4(),
       createdAt: now,
       updatedAt: now,
     };

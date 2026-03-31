@@ -70,6 +70,7 @@ const ContactRow: React.FC<ContactRowProps> = ({ contact, onClick }) => {
     <ListItemButton onClick={onClick} sx={{ borderRadius: 2, mx: 0.5, py: 1 }}>
       <ListItemAvatar>
         <Avatar
+          src={contact.avatarUrl}
           sx={{
             bgcolor: color,
             fontWeight: 700,

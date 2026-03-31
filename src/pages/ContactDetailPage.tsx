@@ -218,6 +218,7 @@ export const ContactDetailPage: React.FC = () => {
         }}
       >
         <Avatar
+          src={contact.avatarUrl}
           sx={{
             width: 92,
             height: 92,

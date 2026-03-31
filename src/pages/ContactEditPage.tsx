@@ -22,6 +22,9 @@ import {
 import AddIcon from "@mui/icons-material/Add";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import { useContactsStore } from "../store/contacts";
+import { useAuthStore } from "../store/auth";
+import { uploadAvatar, deleteAvatar } from "../lib/avatarUpload";
+import { AvatarPicker } from "../components/contact/AvatarPicker";
 import type {
   Contact,
   ContactFormData,
@@ -90,6 +93,7 @@ export const ContactEditPage: React.FC = () => {
   const navigate = useNavigate();
   const { getContact, addContact, updateContact, getAllTags, contacts } =
     useContactsStore();
+  const { user } = useAuthStore();
   const isNew = !id || id === "new";
 
   // Lazy state initialization: no useEffect needed, the component is remounted
@@ -136,6 +140,13 @@ export const ContactEditPage: React.FC = () => {
     return getContact(id)?.sponsorId ?? "";
   });
 
+  const [avatarUrl, setAvatarUrl] = useState<string | undefined>(() => {
+    if (isNew || !id) return undefined;
+    return getContact(id)?.avatarUrl;
+  });
+  const [pendingAvatarFile, setPendingAvatarFile] = useState<File | null>(null);
+  const [avatarDeleted, setAvatarDeleted] = useState(false);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [saving, setSaving] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
@@ -157,21 +168,44 @@ export const ContactEditPage: React.FC = () => {
   const handleSave = async () => {
     if (!validate()) return;
     setSaving(true);
-    const data: ContactFormData = {
-      firstName: firstName.trim(),
-      lastName: lastName.trim(),
-      company: company.trim() || undefined,
-      birthday: birthday || undefined,
-      note: note.trim() || undefined,
-      phones: phones.filter((p) => p.number.trim()),
-      emails: emails.filter((e) => e.address.trim()),
-      addresses: addresses.filter((a) => a.street.trim() || a.city.trim()),
-      tags,
-      sponsorId: sponsorId || undefined,
-    };
+
+    let finalAvatarUrl = avatarDeleted ? undefined : avatarUrl;
+
     try {
+      // Determine contact ID upfront for avatar upload path
+      const contactId = isNew ? uuidv4() : id!;
+
+      // Handle avatar upload if a new file was selected
+      if (pendingAvatarFile && user) {
+        setUploadingAvatar(true);
+        try {
+          finalAvatarUrl = await uploadAvatar(user.id, contactId, pendingAvatarFile);
+        } finally {
+          setUploadingAvatar(false);
+        }
+      }
+
+      // Handle avatar deletion
+      if (avatarDeleted && user && id) {
+        await deleteAvatar(user.id, id);
+      }
+
+      const data: ContactFormData = {
+        firstName: firstName.trim(),
+        lastName: lastName.trim(),
+        company: company.trim() || undefined,
+        birthday: birthday || undefined,
+        note: note.trim() || undefined,
+        avatarUrl: finalAvatarUrl,
+        phones: phones.filter((p) => p.number.trim()),
+        emails: emails.filter((e) => e.address.trim()),
+        addresses: addresses.filter((a) => a.street.trim() || a.city.trim()),
+        tags,
+        sponsorId: sponsorId || undefined,
+      };
+
       if (isNew) {
-        const c = await addContact(data);
+        const c = await addContact(data, contactId);
         navigate(`/contacts/${c.id}`, { replace: true });
       } else if (id) {
         await updateContact(id, data);
@@ -224,6 +258,26 @@ export const ContactEditPage: React.FC = () => {
       >
         {isNew ? "Neuer Kontakt" : "Kontakt bearbeiten"}
       </Typography>
+
+      {/* Avatar */}
+      <Box sx={{ display: "flex", justifyContent: "center", mb: 3 }}>
+        <AvatarPicker
+          currentUrl={avatarUrl}
+          initials={
+            (firstName[0] ?? "") + (lastName[0] ?? "") || undefined
+          }
+          uploading={uploadingAvatar}
+          onFileSelected={(file) => {
+            setPendingAvatarFile(file);
+            setAvatarDeleted(false);
+          }}
+          onDelete={() => {
+            setPendingAvatarFile(null);
+            setAvatarUrl(undefined);
+            setAvatarDeleted(true);
+          }}
+        />
+      </Box>
 
       {/* Name */}
       <Card variant="outlined" sx={{ mb: 2 }}>
