@@ -279,7 +279,7 @@ export const ContactListPage: React.FC = () => {
             >
               {searchQuery || selectedTags.length > 0
                 ? "Keine Kontakte gefunden"
-                : "Noch keine Kontakte"}
+                : "Noch keine Kontakte?"}
             </Typography>
             {!searchQuery && selectedTags.length === 0 && (
               <Typography variant="body2" color="text.disabled" sx={{ mt: 1 }}>
