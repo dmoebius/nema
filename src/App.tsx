@@ -49,8 +49,8 @@ const App: React.FC = () => {
     // Load from local IndexedDB immediately (fast, offline-capable)
     loadContacts();
 
-    // Then sync with Supabase and reload to pick up remote changes (always, even on sync error)
-    sync(user.id).finally(() => loadContacts());
+    // Sync with Supabase — loadContacts is called internally after sync completes
+    sync(user.id);
 
     // Realtime subscription for live updates from other devices
     const channel = subscribeToChanges(

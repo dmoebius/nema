@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { syncAll } from "../sync/supabaseSync";
+import { useContactsStore } from "./contacts";
 
 type SyncStatus = "idle" | "syncing" | "error" | "offline";
 
@@ -33,6 +34,9 @@ export const useSyncStore = create<SyncState>((set, get) => ({
     } catch {
       // Do not expose error details to UI
       set({ status: "error", error: "Sync fehlgeschlagen.", hasError: true });
+    } finally {
+      // Always reload from IndexedDB after sync attempt (success or failure)
+      await useContactsStore.getState().loadContacts();
     }
   },
 }));
