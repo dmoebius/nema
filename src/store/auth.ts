@@ -6,20 +6,17 @@ interface AuthState {
   session: Session | null;
   user: User | null;
   loading: boolean;
-  error: string | null;
 
   // Actions
   initialize: () => Promise<void>;
   sendMagicLink: (email: string) => Promise<void>;
   signOut: () => Promise<void>;
-  clearError: () => void;
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
   session: null,
   user: null,
   loading: true,
-  error: null,
 
   initialize: async () => {
     // Restore existing session from localStorage
@@ -38,17 +35,13 @@ export const useAuthStore = create<AuthState>((set) => ({
       email,
       options: { shouldCreateUser: false }, // Only allow pre-existing users
     });
-    if (error) {
-      set({ error: error.message, loading: false });
-    } else {
-      set({ loading: false });
-    }
+    // Never expose auth errors to the UI — prevents enumeration attacks
+    if (error) console.error("[auth] signInWithOtp error:", error.message);
+    set({ loading: false });
   },
 
   signOut: async () => {
     await supabase.auth.signOut();
     set({ session: null, user: null });
   },
-
-  clearError: () => set({ error: null }),
 }));

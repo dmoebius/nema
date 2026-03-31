@@ -12,7 +12,7 @@ import EmailIcon from "@mui/icons-material/Email";
 import { useAuthStore } from "../../store/auth";
 
 export const LoginPage: React.FC = () => {
-  const { sendMagicLink, loading, error, clearError } = useAuthStore();
+  const { sendMagicLink, loading } = useAuthStore();
   const [email, setEmail] = useState("");
   const [sent, setSent] = useState(false);
 
@@ -20,9 +20,8 @@ export const LoginPage: React.FC = () => {
     e.preventDefault();
     clearError();
     await sendMagicLink(email);
-    if (!useAuthStore.getState().error) {
-      setSent(true);
-    }
+    // Always show the same message regardless of outcome — prevents enumeration attacks
+    setSent(true);
   };
 
   return (
@@ -64,17 +63,10 @@ export const LoginPage: React.FC = () => {
 
         {sent ? (
           <Alert severity="success" icon={<EmailIcon />}>
-            Link verschickt! Schau in dein Postfach und klicke auf den Link.
+            Danke. Wenn die E-Mail-Adresse korrekt und berechtigt ist, dann erhältst du jetzt einen Login-Link. Schau in dein Postfach und klicke auf den Link.
           </Alert>
         ) : (
           <Box component="form" onSubmit={handleSubmit}>
-            {error && (
-              <Alert severity="error" sx={{ mb: 2 }} onClose={clearError}>
-                {error === "Signups not allowed for otp"
-                  ? "Diese E-Mail-Adresse ist nicht berechtigt."
-                  : error}
-              </Alert>
-            )}
             <TextField
               fullWidth
               type="email"
