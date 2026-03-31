@@ -142,7 +142,6 @@ export const ContactListPage: React.FC = () => {
   const navigate = useNavigate();
   const {
     loading,
-    loadContacts,
     getFilteredContacts,
     getAllTags,
     searchQuery,
