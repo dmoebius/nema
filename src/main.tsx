@@ -12,7 +12,7 @@ if ("serviceWorker" in navigator) {
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    <BrowserRouter>
+    <BrowserRouter basename="/nema">
       <App />
     </BrowserRouter>
   </StrictMode>,
