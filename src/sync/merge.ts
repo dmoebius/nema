@@ -43,11 +43,11 @@ export function mergeContacts(
 
     if (localTs >= remoteTs) {
       // Local wins: more recent or equal timestamp
-      (result as Record<string, unknown>)[field] = local[field];
+      (result as unknown as Record<string, unknown>)[field] = local[field];
       mergedTimestamps[field] = localTs;
     } else {
       // Remote wins: more recent timestamp
-      (result as Record<string, unknown>)[field] = remote[field];
+      (result as unknown as Record<string, unknown>)[field] = remote[field];
       mergedTimestamps[field] = remoteTs;
     }
   }
