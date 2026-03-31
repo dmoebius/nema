@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>nema</title>
+  <script>
+    const l = window.location;
+    l.replace(
+      l.protocol + '//' + l.hostname + (l.port ? ':' + l.port : '') +
+      '/nema/?p=' + encodeURIComponent(l.pathname + l.search) + l.hash
+    );
+  </script>
+  <noscript>
+    <meta http-equiv="refresh" content="0;url=/nema/" />
+  </noscript>
+</head>
+<body>
+  <noscript>
+    <p>nema benötigt JavaScript. Bitte aktiviere JavaScript in deinem Browser und lade die Seite neu.</p>
+  </noscript>
+</body>
+</html>

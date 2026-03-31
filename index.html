@@ -32,9 +32,20 @@
       crossorigin="anonymous"
     />
     <title>nema</title>
+    <script>
+      (function() {
+        const p = new URLSearchParams(window.location.search).get('p');
+        if (p) window.history.replaceState(null, null, p);
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>
+    <noscript>
+      <p style="font-family:sans-serif;padding:2rem;text-align:center">
+        nema benötigt JavaScript. Bitte aktiviere JavaScript in deinem Browser und lade die Seite neu.
+      </p>
+    </noscript>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
