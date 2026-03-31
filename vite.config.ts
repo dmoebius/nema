@@ -2,11 +2,8 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import { serwist } from "@serwist/vite";
 
-// Allow overriding the base path via environment variable (e.g. for nema-dev deployment)
-const base = process.env.VITE_BASE_PATH ?? "/nema/";
-
 export default defineConfig({
-  base,
+  base: "/",
   plugins: [
     react(),
     serwist({

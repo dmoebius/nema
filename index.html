@@ -32,12 +32,6 @@
       crossorigin="anonymous"
     />
     <title>nema</title>
-    <script>
-      (function() {
-        const p = new URLSearchParams(window.location.search).get('p');
-        if (p) window.history.replaceState(null, null, p);
-      })();
-    </script>
   </head>
   <body>
     <div id="root"></div>

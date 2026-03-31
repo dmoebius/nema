@@ -40,10 +40,13 @@ NeMa (von **Ne**twork**Ma**rketing) ist ein lightweight CRM / Kontaktmanagement-
 
 ### Branches & Deployments
 
-| Branch | Deployment                              |
-| ------ | --------------------------------------- |
-| `main` | https://dmoebius.github.io/nema/        |
-| `dev`  | https://dmoebius.github.io/nema-dev/    |
+| Branch | Deployment                        |
+| ------ | --------------------------------- |
+| `main` | https://nema-app.pages.dev/       |
+| `dev`  | https://nema-dev.pages.dev/       |
+
+Build läuft in GitHub Actions, Deploy via Wrangler nach Cloudflare Pages.
+Supabase URL/Key kommen aus GitHub Secrets (nie im Code hardcoden).
 
 ## Wichtige Konventionen
 
