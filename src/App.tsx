@@ -13,6 +13,7 @@ import { useContactsStore } from "./store/contacts";
 import { subscribeToChanges } from "./sync/supabaseSync";
 import type { TimestampedContact } from "./sync/merge";
 import { InstallPrompt } from "./components/pwa/InstallPrompt";
+import { ErrorSnackbar } from "./components/feedback/ErrorSnackbar";
 
 // Wrapper with key reset: remounts ContactEditPage when the ID changes
 // (rerender-derived-state-no-effect: no useEffect needed for form initialization)
@@ -71,6 +72,7 @@ const App: React.FC = () => {
       <AuthGuard>
         <AppRoutes />
         <InstallPrompt />
+        <ErrorSnackbar />
       </AuthGuard>
     </ThemeProvider>
   );

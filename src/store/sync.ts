@@ -7,6 +7,7 @@ interface SyncState {
   status: SyncStatus;
   lastSyncAt: string | null;
   error: string | null;
+  hasError: boolean;
 
   sync: (userId: string) => Promise<void>;
 }
@@ -15,6 +16,7 @@ export const useSyncStore = create<SyncState>((set, get) => ({
   status: "idle",
   lastSyncAt: null,
   error: null,
+  hasError: false,
 
   sync: async (userId: string) => {
     if (get().status === "syncing") return;
@@ -24,13 +26,13 @@ export const useSyncStore = create<SyncState>((set, get) => ({
       return;
     }
 
-    set({ status: "syncing", error: null });
+    set({ status: "syncing", error: null, hasError: false });
     try {
       await syncAll(userId);
       set({ status: "idle", lastSyncAt: new Date().toISOString() });
     } catch {
       // Do not expose error details to UI
-      set({ status: "error", error: "Sync fehlgeschlagen." });
+      set({ status: "error", error: "Sync fehlgeschlagen.", hasError: true });
     }
   },
 }));

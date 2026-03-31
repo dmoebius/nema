@@ -8,6 +8,7 @@ import { useSyncStore } from "./sync";
 interface ContactsState {
   contacts: Contact[];
   loading: boolean;
+  hasError: boolean;
   searchQuery: string;
   selectedTags: string[];
 
@@ -29,16 +30,17 @@ interface ContactsState {
 export const useContactsStore = create<ContactsState>((set, get) => ({
   contacts: [],
   loading: false,
+  hasError: false,
   searchQuery: "",
   selectedTags: [],
 
   loadContacts: async () => {
-    set({ loading: true });
+    set({ loading: true, hasError: false });
     try {
       const contacts = await getAllContacts();
       set({ contacts, loading: false });
     } catch {
-      set({ loading: false });
+      set({ loading: false, hasError: true });
     }
   },
 
