@@ -33,8 +33,6 @@ export const useContactsStore = create<ContactsState>((set, get) => ({
   selectedTags: [],
 
   loadContacts: async () => {
-    // Guard: prevents duplicate load in React Strict Mode (advanced-init-once)
-    if (get().loading) return;
     set({ loading: true });
     try {
       const contacts = await getAllContacts();
