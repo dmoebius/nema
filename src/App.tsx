@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Routes, Route, Navigate, useParams } from "react-router-dom";
 import { ThemeProvider, CssBaseline } from "@mui/material";
 import theme from "./theme";
@@ -7,6 +7,11 @@ import { ContactListPage } from "./pages/ContactListPage";
 import { ContactDetailPage } from "./pages/ContactDetailPage";
 import { ContactEditPage } from "./pages/ContactEditPage";
 import { AuthGuard } from "./components/auth/AuthGuard";
+import { useAuthStore } from "./store/auth";
+import { useSyncStore } from "./store/sync";
+import { useContactsStore } from "./store/contacts";
+import { subscribeToChanges } from "./sync/supabaseSync";
+import type { TimestampedContact } from "./sync/merge";
 
 // Wrapper with key reset: remounts ContactEditPage when the ID changes
 // (rerender-derived-state-no-effect: no useEffect needed for form initialization)
@@ -32,6 +37,28 @@ const AppRoutes: React.FC = () => {
 };
 
 const App: React.FC = () => {
+  const { user } = useAuthStore();
+  const { sync } = useSyncStore();
+  const { loadContacts } = useContactsStore();
+
+  useEffect(() => {
+    if (!user) return;
+
+    // Initial sync on login
+    sync(user.id).then(() => loadContacts());
+
+    // Realtime subscription for live updates from other devices
+    const channel = subscribeToChanges(
+      user.id,
+      (_updated: TimestampedContact) => loadContacts(),
+      (_deletedId: string) => loadContacts(),
+    );
+
+    return () => {
+      channel.unsubscribe();
+    };
+  }, [user, sync, loadContacts]);
+
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
