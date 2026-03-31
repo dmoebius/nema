@@ -6,20 +6,44 @@ NeMa (von **Ne**twork**Ma**rketing) ist ein lightweight CRM / Kontaktmanagement-
 
 ## Tech Stack
 
-| Bereich         | Technologie                       |
-| --------------- | --------------------------------- |
-| Build / Dev     | Vite, TypeScript                  |
-| Framework       | React                             |
-| Routing         | React Router (SPA, BrowserRouter) |
-| UI              | Material UI (MUI) + Emotion       |
-| PWA / Offline   | Serwist                           |
-| Package Manager | pnpm                              |
+| Bereich           | Technologie                                        |
+| ----------------- | -------------------------------------------------- |
+| Build / Dev       | Vite, TypeScript                                   |
+| Framework         | React                                              |
+| Routing           | React Router (SPA, BrowserRouter)                  |
+| UI                | Material UI (MUI) + Emotion                        |
+| PWA / Offline     | Serwist                                            |
+| Native App        | Capacitor (Android + iOS)                          |
+| Cloud Storage     | Supabase (DB + Storage + Auth + Realtime)          |
+| Package Manager   | pnpm                                               |
 
 ### PWA / Offline
 
 - Service Worker: `src/sw.ts` (Serwist)
 - Precacht alle statischen Assets aus `dist/`
 - Runtime-Caching via `defaultCache` (aus `@serwist/vite/worker`)
+
+### Capacitor
+
+- Native Shell für Android + iOS
+- Graceful Degradation: `Capacitor.isNativePlatform()` entscheidet ob Telefonbuch-Sync aktiv ist
+- Web-Deployment (GitHub Pages) läuft weiterhin parallel
+
+### Supabase (Cloud Sync)
+
+- Supabase = Master-Datenbank
+- IndexedDB = lokaler Cache (Offline-Fähigkeit)
+- Sync-Strategie: 3-Way-Merge, pro Attribut, last-write-wins anhand `updated_at` Timestamp
+- Profilbilder: Supabase Storage (`avatars/<contact-id>.jpg`), client-side resize auf 256×256 vor Upload
+- Auth: Supabase Auth (E-Mail/Password)
+- Realtime: Supabase Realtime für Live-Updates über mehrere Geräte
+
+### Branches & Deployments
+
+| Branch | Deployment                              |
+| ------ | --------------------------------------- |
+| `main` | https://dmoebius.github.io/nema/        |
+| `dev`  | https://dmoebius.github.io/nema-dev/    |
 
 ## Wichtige Konventionen
 
