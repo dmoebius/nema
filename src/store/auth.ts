@@ -31,12 +31,11 @@ export const useAuthStore = create<AuthState>((set) => ({
 
   sendMagicLink: async (email: string) => {
     set({ loading: true, error: null });
-    const { error } = await supabase.auth.signInWithOtp({
+    // Intentionally discard result — never expose auth failures to client (prevents enumeration attacks)
+    await supabase.auth.signInWithOtp({
       email,
       options: { shouldCreateUser: false }, // Only allow pre-existing users
     });
-    // Intentionally suppress error — never expose auth failures to client (prevents enumeration attacks)
-    void error;
     set({ loading: false });
   },
 

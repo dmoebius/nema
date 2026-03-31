@@ -18,7 +18,6 @@ export const LoginPage: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    clearError();
     await sendMagicLink(email);
     // Always show the same message regardless of outcome — prevents enumeration attacks
     setSent(true);

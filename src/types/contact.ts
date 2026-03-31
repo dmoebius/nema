@@ -33,6 +33,7 @@ export interface Contact {
   emails: Email[];
   addresses: Address[];
   note?: string;
+  avatarUrl?: string;
   tags: string[];
   sponsorId?: string;
   createdAt: string;

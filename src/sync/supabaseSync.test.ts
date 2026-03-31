@@ -53,7 +53,6 @@ beforeEach(() => {
 
 describe("syncAll", () => {
   it("saves remote-only contact locally", async () => {
-    const remote = makeContact({ id: "remote-1" });
     const remoteRow = {
       id: "remote-1",
       first_name: "Max",
