@@ -30,7 +30,7 @@ export const useAuthStore = create<AuthState>((set) => ({
   },
 
   sendMagicLink: async (email: string) => {
-    set({ loading: true, error: null });
+    set({ loading: true });
     // Intentionally discard result — never expose auth failures to client (prevents enumeration attacks)
     await supabase.auth.signInWithOtp({
       email,
