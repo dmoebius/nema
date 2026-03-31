@@ -35,7 +35,7 @@ NeMa (von **Ne**twork**Ma**rketing) ist ein lightweight CRM / Kontaktmanagement-
 - IndexedDB = lokaler Cache (Offline-Fähigkeit)
 - Sync-Strategie: 3-Way-Merge, pro Attribut, last-write-wins anhand `updated_at` Timestamp
 - Profilbilder: Supabase Storage (`avatars/<contact-id>.jpg`), client-side resize auf 256×256 vor Upload
-- Auth: Supabase Auth (E-Mail/Password)
+- Auth: Supabase Auth (Magic Link per E-Mail)
 - Realtime: Supabase Realtime für Live-Updates über mehrere Geräte
 
 ### Branches & Deployments

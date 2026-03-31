@@ -6,6 +6,7 @@ import { Layout } from "./components/Layout";
 import { ContactListPage } from "./pages/ContactListPage";
 import { ContactDetailPage } from "./pages/ContactDetailPage";
 import { ContactEditPage } from "./pages/ContactEditPage";
+import { AuthGuard } from "./components/auth/AuthGuard";
 
 // Wrapper with key reset: remounts ContactEditPage when the ID changes
 // (rerender-derived-state-no-effect: no useEffect needed for form initialization)
@@ -34,7 +35,9 @@ const App: React.FC = () => {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <AppRoutes />
+      <AuthGuard>
+        <AppRoutes />
+      </AuthGuard>
     </ThemeProvider>
   );
 };

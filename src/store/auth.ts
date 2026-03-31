@@ -1,0 +1,54 @@
+import { create } from "zustand";
+import type { Session, User } from "@supabase/supabase-js";
+import { supabase } from "../lib/supabase";
+
+interface AuthState {
+  session: Session | null;
+  user: User | null;
+  loading: boolean;
+  error: string | null;
+
+  // Actions
+  initialize: () => Promise<void>;
+  sendMagicLink: (email: string) => Promise<void>;
+  signOut: () => Promise<void>;
+  clearError: () => void;
+}
+
+export const useAuthStore = create<AuthState>((set) => ({
+  session: null,
+  user: null,
+  loading: true,
+  error: null,
+
+  initialize: async () => {
+    // Restore existing session from localStorage
+    const { data: { session } } = await supabase.auth.getSession();
+    set({ session, user: session?.user ?? null, loading: false });
+
+    // Listen for auth state changes (login, logout, token refresh)
+    supabase.auth.onAuthStateChange((_event, session) => {
+      set({ session, user: session?.user ?? null });
+    });
+  },
+
+  sendMagicLink: async (email: string) => {
+    set({ loading: true, error: null });
+    const { error } = await supabase.auth.signInWithOtp({
+      email,
+      options: { shouldCreateUser: false }, // Only allow pre-existing users
+    });
+    if (error) {
+      set({ error: error.message, loading: false });
+    } else {
+      set({ loading: false });
+    }
+  },
+
+  signOut: async () => {
+    await supabase.auth.signOut();
+    set({ session: null, user: null });
+  },
+
+  clearError: () => set({ error: null }),
+}));
