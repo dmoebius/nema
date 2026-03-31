@@ -6,7 +6,16 @@ import "./index.css";
 
 if ("serviceWorker" in navigator) {
   import("virtual:serwist").then(({ getSerwist }) => {
-    getSerwist().then((sw) => sw?.register());
+    getSerwist().then((sw) => {
+      sw?.register();
+      sw?.addEventListener("waiting", () => {
+        // Only reload on updates, not on first install
+        if (navigator.serviceWorker.controller) {
+          sw.messageSkipWaiting();
+          window.location.reload();
+        }
+      });
+    });
   });
 }
 
