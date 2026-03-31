@@ -44,7 +44,10 @@ const App: React.FC = () => {
   useEffect(() => {
     if (!user) return;
 
-    // Initial sync on login
+    // Load from local IndexedDB immediately (fast, offline-capable)
+    loadContacts();
+
+    // Then sync with Supabase and reload to pick up remote changes
     sync(user.id).then(() => loadContacts());
 
     // Realtime subscription for live updates from other devices
