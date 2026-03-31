@@ -1,4 +1,5 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useRef } from "react";
+import type { RealtimeChannel } from "@supabase/supabase-js";
 import { Routes, Route, Navigate, useParams } from "react-router-dom";
 import { ThemeProvider, CssBaseline } from "@mui/material";
 import theme from "./theme";
@@ -43,6 +44,8 @@ const App: React.FC = () => {
   const { sync } = useSyncStore();
   const { loadContacts } = useContactsStore();
 
+  const channelRef = useRef<RealtimeChannel | null>(null);
+
   useEffect(() => {
     if (!user) return;
 
@@ -52,19 +55,20 @@ const App: React.FC = () => {
 
       // Sync with Supabase — loadContacts is called internally after sync completes
       await sync(user.id);
+
+      // Subscribe to realtime changes only after initial load + sync
+      channelRef.current = subscribeToChanges(
+        user.id,
+        (_updated: TimestampedContact) => loadContacts(),
+        (_deletedId: string) => loadContacts(),
+      );
     };
 
     initialize();
 
-    // Realtime subscription for live updates from other devices
-    const channel = subscribeToChanges(
-      user.id,
-      (_updated: TimestampedContact) => loadContacts(),
-      (_deletedId: string) => loadContacts(),
-    );
-
     return () => {
-      channel.unsubscribe();
+      channelRef.current?.unsubscribe();
+      channelRef.current = null;
     };
     // loadContacts and sync are stable Zustand references — omitted intentionally
     // eslint-disable-next-line react-hooks/exhaustive-deps
