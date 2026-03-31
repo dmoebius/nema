@@ -3,6 +3,7 @@ import react from "@vitejs/plugin-react";
 import { serwist } from "@serwist/vite";
 
 export default defineConfig({
+  base: "/nema/",
   plugins: [
     react(),
     serwist({
