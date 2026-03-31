@@ -61,7 +61,9 @@ const App: React.FC = () => {
     return () => {
       channel.unsubscribe();
     };
-  }, [user, sync, loadContacts]);
+    // loadContacts and sync are stable Zustand references — omitted intentionally
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user]);
 
   return (
     <ThemeProvider theme={theme}>

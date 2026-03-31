@@ -37,8 +37,7 @@ export const useContactsStore = create<ContactsState>((set, get) => ({
     try {
       const contacts = await getAllContacts();
       set({ contacts, loading: false });
-    } catch (e) {
-      console.error("Failed to load contacts", e);
+    } catch {
       set({ loading: false });
     }
   },

@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Box,
@@ -153,9 +153,7 @@ export const ContactListPage: React.FC = () => {
 
   const [showTagFilter, setShowTagFilter] = useState(false);
 
-  useEffect(() => {
-    loadContacts();
-  }, [loadContacts]);
+  // Loading is handled centrally in App.tsx after auth + sync
 
   // useMemo prevents unnecessary recomputation on unrelated re-renders
   const contacts = useMemo(
