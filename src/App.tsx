@@ -46,11 +46,15 @@ const App: React.FC = () => {
   useEffect(() => {
     if (!user) return;
 
-    // Load from local IndexedDB immediately (fast, offline-capable)
-    loadContacts();
+    const initialize = async () => {
+      // Load from local IndexedDB immediately (fast, offline-capable)
+      await loadContacts();
 
-    // Sync with Supabase — loadContacts is called internally after sync completes
-    sync(user.id);
+      // Sync with Supabase — loadContacts is called internally after sync completes
+      await sync(user.id);
+    };
+
+    initialize();
 
     // Realtime subscription for live updates from other devices
     const channel = subscribeToChanges(
