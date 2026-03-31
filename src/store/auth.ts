@@ -35,8 +35,8 @@ export const useAuthStore = create<AuthState>((set) => ({
       email,
       options: { shouldCreateUser: false }, // Only allow pre-existing users
     });
-    // Never expose auth errors to the UI — prevents enumeration attacks
-    if (error) console.error("[auth] signInWithOtp error:", error.message);
+    // Intentionally suppress error — never expose auth failures to client (prevents enumeration attacks)
+    void error;
     set({ loading: false });
   },
 
