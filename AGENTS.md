@@ -55,6 +55,12 @@ Supabase URL/Key kommen aus GitHub Secrets (nie im Code hardcoden).
 - Tag-Filterung: UND-Verknüpfung (alle gewählten Tags müssen vorhanden sein)
 - Suche: Volltext über Name, Firma, Telefon, E-Mail, Tags
 
+## Git / GitHub Workflow
+
+- **Branch nach Merge löschen** — beim Mergen via API immer direkt danach `DELETE /repos/{owner}/{repo}/git/refs/heads/{branch}` aufrufen.
+- **Pipeline nach Merge beobachten** — nach jedem Merge auf `dev` oder `main` die Pipeline des Zielbranches prüfen und bei Fehlern sofort analysieren.
+- **Squash-Merge** für Feature-Branches auf `dev`.
+
 ## E2E Tests (Playwright)
 
 - **Page Objects** — immer! Alle UI-Elemente und Interaktionen in Page Object Classes kapseln (`e2e/pages/`). Nie direkt Locatoren im Test-Code verwenden.
