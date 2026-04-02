@@ -91,7 +91,7 @@ export function LoginPage() {
 
       <Snackbar
         open={snackOpen}
-        autoHideDuration={6000}
+        autoHideDuration={20000}
         onClose={() => setSnackOpen(false)}
         anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
       >
