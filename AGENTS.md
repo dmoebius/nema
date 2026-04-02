@@ -55,6 +55,12 @@ Supabase URL/Key kommen aus GitHub Secrets (nie im Code hardcoden).
 - Tag-Filterung: UND-Verknüpfung (alle gewählten Tags müssen vorhanden sein)
 - Suche: Volltext über Name, Firma, Telefon, E-Mail, Tags
 
+## Repo-eigene Skills
+
+Skills unter `.agents/skills/` sind **immer aktiv** beim Arbeiten an nema:
+- `.agents/skills/vercel-react-best-practices/` — React-Best-Practices (Rendering, Rerender, Async, Bundle, JS). Vor jedem React-Code die relevanten Rules lesen.
+- `.agents/skills/frontend-design/` — Design-Konventionen für die UI.
+
 ## Git / GitHub Workflow
 
 - **Branch nach Merge löschen** — beim Mergen via API immer direkt danach `DELETE /repos/{owner}/{repo}/git/refs/heads/{branch}` aufrufen.
