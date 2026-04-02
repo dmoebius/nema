@@ -19,7 +19,7 @@ export class LoginPage {
     // fill() sets the DOM value but React 19 controlled input onChange may not fire.
     // Workaround: focus the input, select all, then type character by character.
     await this.emailInput.focus();
-    await this.page.keyboard.selectAll();
+    await this.page.keyboard.press("Control+a");
     await this.page.keyboard.type(email, { delay: 20 });
     await expect(this.submitButton).toBeEnabled();
     await this.submitButton.click();
