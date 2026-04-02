@@ -1,9 +1,10 @@
 import { create } from "zustand";
 import { v4 as uuidv4 } from "uuid";
 import type { Contact, ContactFormData } from "../types/contact";
-import { getAllContacts, saveContact, deleteContact } from "../db";
+import { getAllContacts, saveContact, deleteContact, deleteSyncBase } from "../db";
 import { useAuthStore } from "./auth";
 import { useSyncStore } from "./sync";
+import { removeContactFromSupabase } from "../sync/supabaseSync";
 
 interface ContactsState {
   contacts: Contact[];
@@ -78,12 +79,14 @@ export const useContactsStore = create<ContactsState>((set, get) => ({
   },
 
   removeContact: async (id) => {
+    // Delete from Supabase first, then locally — prevents sync from restoring the contact
+    const userId = useAuthStore.getState().user?.id;
+    if (userId) await removeContactFromSupabase(id);
     await deleteContact(id);
+    await deleteSyncBase(id);
     set((state) => ({
       contacts: state.contacts.filter((c) => c.id !== id),
     }));
-    const userId = useAuthStore.getState().user?.id;
-    if (userId) await useSyncStore.getState().sync(userId);
   },
 
   setSearchQuery: (query) => set({ searchQuery: query }),

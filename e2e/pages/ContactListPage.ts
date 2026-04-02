@@ -4,11 +4,13 @@ export class ContactListPage {
   readonly page: Page;
   readonly fab: Locator;
   readonly syncSpinner: Locator;
+  readonly emptyState: Locator;
 
   constructor(page: Page) {
     this.page = page;
     this.fab = page.getByRole("button", { name: "Kontakt hinzufügen" });
     this.syncSpinner = page.getByRole("progressbar", { name: "Synchronisierung läuft" });
+    this.emptyState = page.getByText("Noch keine Kontakte?");
   }
 
   async goto() {

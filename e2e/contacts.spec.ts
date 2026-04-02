@@ -102,5 +102,20 @@ test.describe("contact management", () => {
     await listPage.contactRow(fullDisplay).click();
     await expect(detailPage.updatedAt).toBeVisible();
     expect(await detailPage.getUpdatedAtValue()).toBe(fullUpdatedAt);
+    await detailPage.navigateBack();
+
+    // Delete minimal contact — list must only show full contact afterwards
+    await listPage.contactRow(minimalDisplay).click();
+    await detailPage.deleteContact();
+    await expect(page).toHaveURL("/");
+    await expect(listPage.contactRow(minimalDisplay)).not.toBeVisible();
+    await expect(listPage.contactRow(fullDisplay)).toBeVisible();
+
+    // Delete full contact — list must be empty afterwards
+    await listPage.contactRow(fullDisplay).click();
+    await detailPage.deleteContact();
+    await expect(page).toHaveURL("/");
+    await expect(listPage.contactRow(fullDisplay)).not.toBeVisible();
+    await expect(listPage.emptyState).toBeVisible();
   });
 });
