@@ -57,7 +57,7 @@ export class ContactEditPage {
 
     if (contact.phone) {
       await this.addPhoneButton.click();
-      await this.page.getByLabel("Nummer").fill(contact.phone.number);
+      await this.page.getByLabel("Nummer").last().fill(contact.phone.number);
     }
 
     if (contact.email) {
