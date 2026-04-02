@@ -8,21 +8,18 @@ test.describe("login page", () => {
   test("magic link request shows confirmation snackbar for valid and unknown email", async ({
     page,
   }) => {
-    // Wipe localStorage before the app boots — ensures no stale Supabase session
-    // survives even if the service worker serves a cached response
-    await page.addInitScript(() => {
-      localStorage.clear();
-    });
-
     const loginPage = new LoginPage(page);
 
     await page.goto("/");
-
-    // Wait for service worker to finish and the page to be fully interactive
     await page.waitForLoadState("networkidle");
+
+    // Explicitly clear localStorage after load to remove any stale Supabase session
+    // that the service worker may have served from cache
+    await page.evaluate(() => localStorage.clear());
+    await page.reload();
+    await page.waitForLoadState("networkidle");
+
     await expect(loginPage.submitButton).toBeVisible();
-    // Small delay to let autoFocus settle before interacting with the input
-    await page.waitForTimeout(500);
 
     // Known (valid) email — must show confirmation snackbar
     await loginPage.requestMagicLink(process.env.E2E_TEST_EMAIL!);
