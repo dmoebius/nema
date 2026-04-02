@@ -94,13 +94,13 @@ export function LoginPage() {
         autoHideDuration={6000}
         onClose={() => setSnackOpen(false)}
         anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
-        data-testid="magic-link-snackbar"
       >
         <Alert
           onClose={() => setSnackOpen(false)}
           severity="success"
           variant="filled"
           sx={{ width: "100%" }}
+          data-testid="magic-link-snackbar"
         >
           Falls diese E-Mail-Adresse berechtigt ist, erhältst du gleich einen Login-Link. Schau in dein Postfach.
         </Alert>
