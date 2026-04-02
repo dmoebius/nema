@@ -1,11 +1,8 @@
 import type { Page, Locator } from "@playwright/test";
 
-export interface MinimalContact {
+export interface ContactData {
   firstName: string;
   lastName: string;
-}
-
-export interface FullContact extends MinimalContact {
   company?: string;
   phone?: { number: string };
   email?: { address: string };
@@ -42,12 +39,7 @@ export class ContactEditPage {
     this.addAddressButton = page.getByRole("button", { name: "Adresse hinzufügen" });
   }
 
-  async fillMinimal(contact: MinimalContact) {
-    await this.firstNameInput.fill(contact.firstName);
-    await this.lastNameInput.fill(contact.lastName);
-  }
-
-  async fillFull(contact: FullContact) {
+  async fill(contact: ContactData) {
     await this.firstNameInput.fill(contact.firstName);
     await this.lastNameInput.fill(contact.lastName);
 

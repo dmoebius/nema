@@ -2,17 +2,17 @@ import { test, expect } from "@playwright/test";
 import { ContactListPage } from "./pages/ContactListPage";
 import { ContactEditPage } from "./pages/ContactEditPage";
 import { ContactDetailPage } from "./pages/ContactDetailPage";
-import type { FullContact } from "./pages/ContactEditPage";
+import type { ContactData } from "./pages/ContactEditPage";
 
 // Unique suffix per run to avoid collisions with existing test data
 const RUN_ID = Date.now();
 
-const MINIMAL_CONTACT = {
+const MINIMAL_CONTACT: ContactData = {
   firstName: "Minimal",
   lastName: `Test-${RUN_ID}-A`,
 };
 
-const FULL_CONTACT: FullContact = {
+const FULL_CONTACT: ContactData = {
   firstName: "Maximal",
   lastName: `Test-${RUN_ID}-B`,
   company: "Playwright GmbH",
@@ -31,12 +31,12 @@ const fullDisplay = `${FULL_CONTACT.lastName}, ${FULL_CONTACT.firstName}`;
 async function createContact(
   page: import("@playwright/test").Page,
   listPage: ContactListPage,
-  fill: (editPage: ContactEditPage) => Promise<void>,
+  contact: ContactData,
 ): Promise<void> {
   await listPage.clickAddContact();
   const editPage = new ContactEditPage(page);
   await expect(editPage.heading).toBeVisible();
-  await fill(editPage);
+  await editPage.fill(contact);
   await editPage.save();
   // After save: redirected to detail page (sync completes before navigation)
   await expect(page).toHaveURL(/\/contacts\/[^/]+$/);
@@ -53,7 +53,7 @@ test.describe("contact management", () => {
     await listPage.waitForReady();
 
     // Create minimal contact (first name + last name only)
-    await createContact(page, listPage, (ep) => ep.fillMinimal(MINIMAL_CONTACT));
+    await createContact(page, listPage, MINIMAL_CONTACT);
 
     // Capture updatedAt — must not change after sync
     await expect(detailPage.updatedAt).toBeVisible();
@@ -65,7 +65,7 @@ test.describe("contact management", () => {
     await expect(listPage.contactRow(minimalDisplay)).toBeVisible();
 
     // Create full contact (all fields)
-    await createContact(page, listPage, (ep) => ep.fillFull(FULL_CONTACT));
+    await createContact(page, listPage, FULL_CONTACT);
 
     // Capture updatedAt for full contact
     await expect(detailPage.updatedAt).toBeVisible();
