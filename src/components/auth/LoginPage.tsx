@@ -94,6 +94,7 @@ export function LoginPage() {
         autoHideDuration={8000}
         onClose={() => setSnackOpen(false)}
         anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+        data-testid="magic-link-snackbar"
       >
         <Alert
           onClose={() => setSnackOpen(false)}

@@ -10,7 +10,7 @@ export class LoginPage {
     this.page = page;
     this.emailInput = page.getByLabel("E-Mail");
     this.submitButton = page.getByRole("button", { name: "Login-Link anfordern" });
-    this.confirmationSnackbar = page.getByText(/Falls diese E-Mail-Adresse berechtigt ist/);
+    this.confirmationSnackbar = page.getByTestId("magic-link-snackbar");
   }
 
   async requestMagicLink(email: string) {
