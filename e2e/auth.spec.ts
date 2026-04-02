@@ -2,6 +2,7 @@ import { test, expect, chromium } from "@playwright/test";
 import { createClient } from "@supabase/supabase-js";
 import { AppMenuPage } from "./pages/AppMenuPage";
 import { ContactListPage } from "./pages/ContactListPage";
+import { LoginPage } from "./pages/LoginPage";
 
 // This test logs out — it must use a fresh isolated browser context so it does
 // not invalidate the shared storageState used by all other test files.
@@ -51,5 +52,28 @@ test.describe("authentication", () => {
 
     await context.close();
     await browser.close();
+  });
+
+  // This test runs unauthenticated — override storageState to use an empty context
+  test.use({ storageState: { cookies: [], origins: [] } });
+
+  test("magic link request shows confirmation snackbar for valid and unknown email", async ({
+    page,
+  }) => {
+    const loginPage = new LoginPage(page);
+
+    await page.goto("/");
+    await expect(loginPage.submitButton).toBeVisible();
+
+    // Known (valid) email
+    await loginPage.requestMagicLink(process.env.E2E_TEST_EMAIL!);
+    await expect(loginPage.confirmationSnackbar).toBeVisible();
+
+    // Snackbar closes after 8s — wait for it, then test again with unknown email
+    await expect(loginPage.confirmationSnackbar).not.toBeVisible();
+
+    // Unknown email — must show the same confirmation (no enumeration)
+    await loginPage.requestMagicLink("unknown-user@example.invalid");
+    await expect(loginPage.confirmationSnackbar).toBeVisible();
   });
 });
