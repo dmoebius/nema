@@ -21,6 +21,8 @@ test.describe("login page", () => {
     // Wait for service worker to finish and the page to be fully interactive
     await page.waitForLoadState("networkidle");
     await expect(loginPage.submitButton).toBeVisible();
+    // Small delay to let autoFocus settle before interacting with the input
+    await page.waitForTimeout(500);
 
     // Known (valid) email — must show confirmation snackbar
     await loginPage.requestMagicLink(process.env.E2E_TEST_EMAIL!);
