@@ -11,14 +11,6 @@ test.describe("login page", () => {
     const loginPage = new LoginPage(page);
 
     await page.goto("/");
-    await page.waitForLoadState("networkidle");
-
-    // Explicitly clear localStorage after load to remove any stale Supabase session
-    // that the service worker may have served from cache
-    await page.evaluate(() => localStorage.clear());
-    await page.reload();
-    await page.waitForLoadState("networkidle");
-
     await expect(loginPage.submitButton).toBeVisible();
 
     // Known (valid) email — must show confirmation snackbar
