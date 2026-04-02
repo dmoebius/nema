@@ -55,7 +55,7 @@ export const useContactsStore = create<ContactsState>((set, get) => ({
     await saveContact(contact);
     set((state) => ({ contacts: [...state.contacts, contact] }));
     const userId = useAuthStore.getState().user?.id;
-    if (userId) useSyncStore.getState().sync(userId);
+    if (userId) await useSyncStore.getState().sync(userId);
     return contact;
   },
 
@@ -74,7 +74,7 @@ export const useContactsStore = create<ContactsState>((set, get) => ({
       contacts: state.contacts.map((c) => (c.id === id ? updated : c)),
     }));
     const userId = useAuthStore.getState().user?.id;
-    if (userId) useSyncStore.getState().sync(userId);
+    if (userId) await useSyncStore.getState().sync(userId);
   },
 
   removeContact: async (id) => {
@@ -83,7 +83,7 @@ export const useContactsStore = create<ContactsState>((set, get) => ({
       contacts: state.contacts.filter((c) => c.id !== id),
     }));
     const userId = useAuthStore.getState().user?.id;
-    if (userId) useSyncStore.getState().sync(userId);
+    if (userId) await useSyncStore.getState().sync(userId);
   },
 
   setSearchQuery: (query) => set({ searchQuery: query }),
