@@ -18,10 +18,10 @@ export class LoginPage {
   }
 
   async requestMagicLink(email: string) {
-    // Click the input first to ensure focus, then type char by char to trigger React onChange
-    await this.emailInput.click();
-    await this.emailInput.pressSequentially(email);
-    // Wait until the button becomes enabled (React state updated with typed email)
+    // Triple-click to select all existing text, then type to replace
+    await this.emailInput.click({ clickCount: 3 });
+    await this.emailInput.type(email);
+    // Wait until the button becomes enabled (React state updated)
     await expect(this.submitButton).toBeEnabled();
     await this.submitButton.click();
   }
