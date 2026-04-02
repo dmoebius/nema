@@ -9,7 +9,9 @@ export class LoginPage {
 
   constructor(page: Page) {
     this.page = page;
-    this.emailInput = page.getByLabel("E-Mail");
+    // Use the native input element directly — MUI TextField with type="email" requires
+    // targeting the underlying <input> for Playwright fill() to trigger React's onChange
+    this.emailInput = page.locator('input[type="email"]');
     this.submitButton = page.getByRole("button", { name: "Login-Link anfordern" });
     // MUI Snackbar renders into a Portal at the bottom of the DOM
     this.confirmationSnackbar = page.locator("[data-testid='magic-link-snackbar']");
