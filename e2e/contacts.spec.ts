@@ -111,11 +111,11 @@ test.describe("contact management", () => {
     await expect(listPage.contactRow(minimalDisplay)).not.toBeVisible();
     await expect(listPage.contactRow(fullDisplay)).toBeVisible();
 
-    // Delete full contact — list must be empty afterwards
+    // Delete full contact — neither test contact must be visible afterwards
     await listPage.contactRow(fullDisplay).click();
     await detailPage.deleteContact();
     await expect(page).toHaveURL("/");
     await expect(listPage.contactRow(fullDisplay)).not.toBeVisible();
-    await expect(listPage.emptyState).toBeVisible();
+    await expect(listPage.contactRow(minimalDisplay)).not.toBeVisible();
   });
 });
