@@ -64,7 +64,8 @@ export function LoginPage() {
         <Box component="form" onSubmit={handleSubmit}>
           <TextField
             fullWidth
-            type="email"
+            type="text"
+            inputMode="email"
             label="E-Mail"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
