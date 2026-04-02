@@ -336,7 +336,7 @@ export const ContactEditPage: React.FC = () => {
             sx={{ mb: 1.5 }}
           >
             <Typography sx={sectionHeaderSx}>Telefon</Typography>
-            <IconButton size="small" onClick={addPhone} color="primary">
+            <IconButton size="small" onClick={addPhone} color="primary" aria-label="Telefonnummer hinzufügen">
               <AddIcon />
             </IconButton>
           </Stack>
@@ -397,7 +397,7 @@ export const ContactEditPage: React.FC = () => {
             sx={{ mb: 1.5 }}
           >
             <Typography sx={sectionHeaderSx}>E-Mail</Typography>
-            <IconButton size="small" onClick={addEmail} color="primary">
+            <IconButton size="small" onClick={addEmail} color="primary" aria-label="E-Mail hinzufügen">
               <AddIcon />
             </IconButton>
           </Stack>
@@ -462,7 +462,7 @@ export const ContactEditPage: React.FC = () => {
             sx={{ mb: 1.5 }}
           >
             <Typography sx={sectionHeaderSx}>Adresse</Typography>
-            <IconButton size="small" onClick={addAddress} color="primary">
+            <IconButton size="small" onClick={addAddress} color="primary" aria-label="Adresse hinzufügen">
               <AddIcon />
             </IconButton>
           </Stack>

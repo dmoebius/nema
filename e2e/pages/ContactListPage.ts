@@ -31,4 +31,11 @@ export class ContactListPage {
   contactRow(fullName: string): Locator {
     return this.page.getByText(fullName);
   }
+
+  async contactRowIndex(fullName: string): Promise<number> {
+    // Returns the vertical position (y) of the row — used to verify sort order
+    const box = await this.contactRow(fullName).boundingBox();
+    if (!box) throw new Error(`Contact row not found: ${fullName}`);
+    return box.y;
+  }
 }
