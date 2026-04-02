@@ -18,10 +18,11 @@ export function LoginPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    await sendMagicLink(email);
-    // Always show confirmation regardless of outcome — prevents enumeration attacks
+    // Show confirmation immediately — before the async call completes.
+    // Always shown regardless of outcome to prevent enumeration attacks.
     setSnackOpen(true);
     setEmail("");
+    await sendMagicLink(email);
   };
 
   return (
