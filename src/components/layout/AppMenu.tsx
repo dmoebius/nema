@@ -1,10 +1,10 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { IconButton, Menu, MenuItem, ListItemIcon, ListItemText } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 import LogoutIcon from "@mui/icons-material/Logout";
 import { useAuthStore } from "../../store/auth";
 
-export const AppMenu: React.FC = () => {
+export function AppMenu() {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const { signOut } = useAuthStore();
 
@@ -51,4 +51,4 @@ export const AppMenu: React.FC = () => {
       </Menu>
     </>
   );
-};
+}

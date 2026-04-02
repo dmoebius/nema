@@ -1,4 +1,3 @@
-import React from "react";
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import { AppBar, Toolbar, Typography, Box, IconButton, CircularProgress } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
@@ -10,10 +9,7 @@ interface LayoutProps {
   showBack?: boolean;
 }
 
-export const Layout: React.FC<LayoutProps> = ({
-  title = "nema",
-  showBack = false,
-}) => {
+export function Layout({ title = "nema", showBack = false }: LayoutProps) {
   const navigate = useNavigate();
   const location = useLocation();
   const { status: syncStatus } = useSyncStore();
@@ -67,4 +63,4 @@ export const Layout: React.FC<LayoutProps> = ({
       </Box>
     </Box>
   );
-};
+}
