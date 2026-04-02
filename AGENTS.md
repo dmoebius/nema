@@ -61,6 +61,7 @@ Supabase URL/Key kommen aus GitHub Secrets (nie im Code hardcoden).
 - **Keine individuellen Timeouts** bei `expect()`/`waitFor()` — immer den konfigurierten Default-Timeout von Playwright verwenden. Ausnahmen nur wenn fachlich begründet und kommentiert.
 - Test-Beschreibungen (`describe`, `test`) immer auf Englisch.
 - UI-Text in Locatoren (Labels, Button-Namen etc.) bleibt Deutsch — das ist die App-Sprache.
+- **Formulartests — minimal + maximal:** Jeder E2E-Test für ein Formular muss zwei Varianten abdecken: einmal mit Mindestbefüllung (nur Pflichtfelder) und einmal mit vollständiger Befüllung aller Felder. Beide Einträge werden im selben Test angelegt und anschließend gemeinsam geprüft (Liste, Sortierung, Detailansicht).
 
 ## Entwicklungsrichtlinien
 
