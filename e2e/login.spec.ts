@@ -13,14 +13,6 @@ test.describe("login page", () => {
     await page.goto("/");
     await expect(loginPage.submitButton).toBeVisible();
 
-    // Debug: verify the input is in the DOM and interactable
-    const inputValue = await loginPage.emailInput.inputValue();
-    const isEditable = await loginPage.emailInput.isEditable();
-    console.log(`[debug] input value before fill: "${inputValue}", editable: ${isEditable}`);
-    await loginPage.emailInput.fill("debug@test.example");
-    const afterFill = await loginPage.emailInput.inputValue();
-    console.log(`[debug] input value after fill: "${afterFill}"`);
-
     // Known (valid) email — must show confirmation snackbar
     await loginPage.requestMagicLink(process.env.E2E_TEST_EMAIL!);
     await expect(loginPage.confirmationSnackbar).toBeVisible();
