@@ -89,3 +89,10 @@ export async function deleteSyncBase(id: string): Promise<void> {
   const db = await getDB();
   await db.delete("syncBase", id);
 }
+
+// Wipe all local data (contacts + sync base) — called on logout
+export async function clearAllData(): Promise<void> {
+  const db = await getDB();
+  await db.clear("contacts");
+  await db.clear("syncBase");
+}

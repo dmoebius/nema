@@ -1,18 +1,15 @@
-import React from "react";
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import { AppBar, Toolbar, Typography, Box, IconButton, CircularProgress } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { useSyncStore } from "../store/sync";
+import { AppMenu } from "./layout/AppMenu";
 
 interface LayoutProps {
   title?: string;
   showBack?: boolean;
 }
 
-export const Layout: React.FC<LayoutProps> = ({
-  title = "nema",
-  showBack = false,
-}) => {
+export function Layout({ title = "nema", showBack = false }: LayoutProps) {
   const navigate = useNavigate();
   const location = useLocation();
   const { status: syncStatus } = useSyncStore();
@@ -51,10 +48,11 @@ export const Layout: React.FC<LayoutProps> = ({
               size={18}
               thickness={5}
               color="inherit"
-              sx={{ opacity: 0.7, mr: 0.5 }}
+              sx={{ opacity: 0.7, mr: 1 }}
               aria-label="Synchronisierung läuft"
             />
           )}
+          <AppMenu />
         </Toolbar>
       </AppBar>
       <Box
@@ -65,4 +63,4 @@ export const Layout: React.FC<LayoutProps> = ({
       </Box>
     </Box>
   );
-};
+}
