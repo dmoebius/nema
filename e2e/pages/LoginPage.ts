@@ -18,9 +18,10 @@ export class LoginPage {
   }
 
   async requestMagicLink(email: string) {
-    await this.emailInput.fill(email);
-    // Wait until the button becomes enabled (React state updated with filled email)
-    await this.submitButton.waitFor({ state: "visible" });
+    // Click the input first to ensure focus, then type char by char to trigger React onChange
+    await this.emailInput.click();
+    await this.emailInput.pressSequentially(email);
+    // Wait until the button becomes enabled (React state updated with typed email)
     await expect(this.submitButton).toBeEnabled();
     await this.submitButton.click();
   }
