@@ -26,3 +26,9 @@ dist-ssr
 # Serwist
 public/sw*
 public/swe-worker*
+
+# Playwright
+/playwright-report/
+/test-results/
+/playwright/.auth/
+.env.test.local
