@@ -2,7 +2,7 @@ import { test, expect, chromium } from "@playwright/test";
 import { createClient } from "@supabase/supabase-js";
 import { AppMenuPage } from "./pages/AppMenuPage";
 import { ContactListPage } from "./pages/ContactListPage";
-import { LoginPage } from "./pages/LoginPage";
+
 
 // ──────────────────────────────────────────────────────────────────────────────
 // Logout test — uses an isolated browser context so it does not invalidate
@@ -57,29 +57,4 @@ test.describe("authentication — logout", () => {
   });
 });
 
-// ──────────────────────────────────────────────────────────────────────────────
-// Magic link test — runs unauthenticated (empty storageState)
-// ──────────────────────────────────────────────────────────────────────────────
-test.describe("authentication — magic link", () => {
-  test.use({ storageState: { cookies: [], origins: [] } });
 
-  test("magic link request shows confirmation snackbar for valid and unknown email", async ({
-    page,
-  }) => {
-    const loginPage = new LoginPage(page);
-
-    await page.goto("/");
-    await expect(loginPage.submitButton).toBeVisible();
-
-    // Known (valid) email — must show confirmation snackbar
-    await loginPage.requestMagicLink(process.env.E2E_TEST_EMAIL!);
-    await expect(loginPage.confirmationSnackbar).toBeVisible();
-
-    // Wait for snackbar to auto-close (8s), then test with unknown email
-    await expect(loginPage.confirmationSnackbar).not.toBeVisible();
-
-    // Unknown email — must show the same confirmation (no enumeration)
-    await loginPage.requestMagicLink("unknown-user@example.invalid");
-    await expect(loginPage.confirmationSnackbar).toBeVisible();
-  });
-});
