@@ -1,4 +1,5 @@
 import type { Page, Locator } from "@playwright/test";
+import { expect } from "@playwright/test";
 
 export class LoginPage {
   readonly page: Page;
@@ -10,11 +11,20 @@ export class LoginPage {
     this.page = page;
     this.emailInput = page.getByLabel("E-Mail");
     this.submitButton = page.getByRole("button", { name: "Login-Link anfordern" });
-    this.confirmationSnackbar = page.getByTestId("magic-link-snackbar");
+    // MUI Snackbar renders into a Portal at the bottom of the DOM
+    this.confirmationSnackbar = page.locator("[data-testid='magic-link-snackbar']");
   }
 
   async requestMagicLink(email: string) {
     await this.emailInput.fill(email);
+    // Wait until the button becomes enabled (React state updated with filled email)
+    await this.submitButton.waitFor({ state: "visible" });
+    await expect(this.submitButton).toBeEnabled();
     await this.submitButton.click();
+  }
+
+  async closeSnackbar() {
+    // MUI Alert close button has aria-label="Close"
+    await this.page.getByRole("button", { name: "Close" }).click();
   }
 }

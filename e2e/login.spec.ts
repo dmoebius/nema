@@ -17,8 +17,8 @@ test.describe("login page", () => {
     await loginPage.requestMagicLink(process.env.E2E_TEST_EMAIL!);
     await expect(loginPage.confirmationSnackbar).toBeVisible();
 
-    // Close snackbar manually, then test with unknown email
-    await page.getByRole("button", { name: "Close" }).click();
+    // Close snackbar via its close button, then test with unknown email
+    await loginPage.closeSnackbar();
     await expect(loginPage.confirmationSnackbar).not.toBeVisible();
 
     // Unknown email — must show the same confirmation (prevents enumeration)
