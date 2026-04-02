@@ -18,9 +18,18 @@ export class LoginPage {
   }
 
   async requestMagicLink(email: string) {
-    // Triple-click to select all existing text, then type to replace
-    await this.emailInput.click({ clickCount: 3 });
-    await this.emailInput.type(email);
+    // Use evaluate to set the value and dispatch a React-compatible input event.
+    // Necessary because autoFocus + type="email" in CI can prevent Playwright's
+    // fill/type from triggering React's synthetic onChange handler.
+    await this.emailInput.evaluate((el: HTMLInputElement, value) => {
+      const nativeInputValueSetter = Object.getOwnPropertyDescriptor(
+        window.HTMLInputElement.prototype,
+        "value",
+      )?.set;
+      nativeInputValueSetter?.call(el, value);
+      el.dispatchEvent(new Event("input", { bubbles: true }));
+      el.dispatchEvent(new Event("change", { bubbles: true }));
+    }, email);
     // Wait until the button becomes enabled (React state updated)
     await expect(this.submitButton).toBeEnabled();
     await this.submitButton.click();
