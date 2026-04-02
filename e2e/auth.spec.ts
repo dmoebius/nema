@@ -4,9 +4,11 @@ import { AppMenuPage } from "./pages/AppMenuPage";
 import { ContactListPage } from "./pages/ContactListPage";
 import { LoginPage } from "./pages/LoginPage";
 
-// This test logs out — it must use a fresh isolated browser context so it does
-// not invalidate the shared storageState used by all other test files.
-test.describe("authentication", () => {
+// ──────────────────────────────────────────────────────────────────────────────
+// Logout test — uses an isolated browser context so it does not invalidate
+// the shared storageState used by all other test files.
+// ──────────────────────────────────────────────────────────────────────────────
+test.describe("authentication — logout", () => {
   test("logout via hamburger menu shows login page and clears local data", async () => {
     const supabaseUrl = process.env.VITE_SUPABASE_URL!;
     const supabaseAnonKey = process.env.VITE_SUPABASE_ANON_KEY!;
@@ -53,8 +55,12 @@ test.describe("authentication", () => {
     await context.close();
     await browser.close();
   });
+});
 
-  // This test runs unauthenticated — override storageState to use an empty context
+// ──────────────────────────────────────────────────────────────────────────────
+// Magic link test — runs unauthenticated (empty storageState)
+// ──────────────────────────────────────────────────────────────────────────────
+test.describe("authentication — magic link", () => {
   test.use({ storageState: { cookies: [], origins: [] } });
 
   test("magic link request shows confirmation snackbar for valid and unknown email", async ({
@@ -65,11 +71,11 @@ test.describe("authentication", () => {
     await page.goto("/");
     await expect(loginPage.submitButton).toBeVisible();
 
-    // Known (valid) email
+    // Known (valid) email — must show confirmation snackbar
     await loginPage.requestMagicLink(process.env.E2E_TEST_EMAIL!);
     await expect(loginPage.confirmationSnackbar).toBeVisible();
 
-    // Snackbar closes after 8s — wait for it, then test again with unknown email
+    // Wait for snackbar to auto-close (8s), then test with unknown email
     await expect(loginPage.confirmationSnackbar).not.toBeVisible();
 
     // Unknown email — must show the same confirmation (no enumeration)
