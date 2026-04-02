@@ -53,7 +53,10 @@ export function mergeContacts(
   }
 
   result.fieldTimestamps = mergedTimestamps;
-  result.updatedAt = new Date().toISOString();
+  // Use the most recent updatedAt from either side — do not generate a new timestamp.
+  // Generating a new timestamp here would cause an infinite sync loop (each merge
+  // produces a "newer" contact, which triggers another merge on the next sync).
+  result.updatedAt = local.updatedAt >= remote.updatedAt ? local.updatedAt : remote.updatedAt;
 
   return result;
 }

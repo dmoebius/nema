@@ -55,6 +55,13 @@ Supabase URL/Key kommen aus GitHub Secrets (nie im Code hardcoden).
 - Tag-Filterung: UND-Verknüpfung (alle gewählten Tags müssen vorhanden sein)
 - Suche: Volltext über Name, Firma, Telefon, E-Mail, Tags
 
+## E2E Tests (Playwright)
+
+- **Page Objects** — immer! Alle UI-Elemente und Interaktionen in Page Object Classes kapseln (`e2e/pages/`). Nie direkt Locatoren im Test-Code verwenden.
+- **Keine individuellen Timeouts** bei `expect()`/`waitFor()` — immer den konfigurierten Default-Timeout von Playwright verwenden. Ausnahmen nur wenn fachlich begründet und kommentiert.
+- Test-Beschreibungen (`describe`, `test`) immer auf Englisch.
+- UI-Text in Locatoren (Labels, Button-Namen etc.) bleibt Deutsch — das ist die App-Sprache.
+
 ## Entwicklungsrichtlinien
 
 - React-Komponenten für Pages sollten klein gehalten werden, nicht groß und monolithisch. Eine Page besteht aus mehreren Komponenten. Komponenten sollen möglichs wiederverwendet werden.

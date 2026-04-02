@@ -1,7 +1,8 @@
 import React from "react";
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
-import { AppBar, Toolbar, Typography, Box, IconButton } from "@mui/material";
+import { AppBar, Toolbar, Typography, Box, IconButton, CircularProgress } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import { useSyncStore } from "../store/sync";
 
 interface LayoutProps {
   title?: string;
@@ -14,6 +15,7 @@ export const Layout: React.FC<LayoutProps> = ({
 }) => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { status: syncStatus } = useSyncStore();
   const isRoot = location.pathname === "/";
 
   return (
@@ -24,6 +26,7 @@ export const Layout: React.FC<LayoutProps> = ({
             <IconButton
               edge="start"
               color="inherit"
+              aria-label="Zurück"
               onClick={() => navigate(-1)}
               sx={{ mr: 1, opacity: 0.9 }}
             >
@@ -43,6 +46,15 @@ export const Layout: React.FC<LayoutProps> = ({
           >
             {title}
           </Typography>
+          {syncStatus === "syncing" && (
+            <CircularProgress
+              size={18}
+              thickness={5}
+              color="inherit"
+              sx={{ opacity: 0.7, mr: 0.5 }}
+              aria-label="Synchronisierung läuft"
+            />
+          )}
         </Toolbar>
       </AppBar>
       <Box

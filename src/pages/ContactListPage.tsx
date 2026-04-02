@@ -142,6 +142,7 @@ export const ContactListPage: React.FC = () => {
   const navigate = useNavigate();
   const {
     loading,
+    contacts: rawContacts,
     getFilteredContacts,
     getAllTags,
     searchQuery,
@@ -152,14 +153,17 @@ export const ContactListPage: React.FC = () => {
 
   const [showTagFilter, setShowTagFilter] = useState(false);
 
-  // Loading is handled centrally in App.tsx after auth + sync
-
-  // useMemo prevents unnecessary recomputation on unrelated re-renders
+  // rawContacts as dependency ensures recompute when the store is updated after sync
   const contacts = useMemo(
     () => getFilteredContacts(),
-    [getFilteredContacts, searchQuery, selectedTags],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [rawContacts, searchQuery, selectedTags],
   );
-  const allTags = useMemo(() => getAllTags(), [getAllTags, contacts]);
+  const allTags = useMemo(
+    () => getAllTags(),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [rawContacts],
+  );
 
   // Group contacts by first letter of last name
   const { grouped, letters } = useMemo(() => {

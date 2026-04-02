@@ -532,6 +532,8 @@ export const ContactDetailPage: React.FC = () => {
           display="block"
           textAlign="right"
           sx={{ mt: 1 }}
+          data-testid="contact-updated-at"
+          data-value={contact.updatedAt}
         >
           Zuletzt geändert:{" "}
           {new Date(contact.updatedAt).toLocaleString("de-DE")}
