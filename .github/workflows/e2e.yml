@@ -14,6 +14,8 @@ jobs:
       - uses: actions/checkout@v4
 
       - uses: pnpm/action-setup@v4
+        with:
+          version: 10
 
       - uses: actions/setup-node@v4
         with:
@@ -34,7 +36,7 @@ jobs:
           VITE_SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
 
       - name: Run e2e tests
-        run: pnpm run test:e2e
+        run: pnpm run test:e2e:ci
         env:
           # No E2E_BASE_URL → playwright.config.ts starts vite preview on localhost:5173
           VITE_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}

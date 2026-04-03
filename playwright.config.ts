@@ -36,17 +36,24 @@ export default defineConfig({
       name: "chromium",
       use: {
         ...devices["Desktop Chrome"],
+        // Use new headless mode (real Chrome engine, not headless shell).
+        channel: "chromium",
         storageState: "playwright/.auth/user.json",
+        launchOptions: {
+          // Required in sandboxed/containerized environments without user namespaces.
+          args: ["--no-sandbox", "--disable-setuid-sandbox"],
+        },
       },
       dependencies: ["setup"],
     },
   ],
 
-  // Local: start Vite dev server. CI: serve the pre-built dist via vite preview.
+  // Serve the pre-built dist via vite preview (local + CI).
+  // Run `pnpm build` before running tests locally.
   webServer: process.env.E2E_BASE_URL
     ? undefined
     : {
-        command: process.env.CI ? "pnpm preview --port 5173" : "pnpm dev",
+        command: "pnpm preview --port 5173",
         url: "http://localhost:5173",
         reuseExistingServer: !process.env.CI,
         timeout: 30_000,
