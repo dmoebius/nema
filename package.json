@@ -12,9 +12,9 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "preview": "vite preview",
-    "test:e2e": "playwright test",
+    "test:e2e": "pnpm build && playwright test",
     "test:e2e:ui": "playwright test --ui",
-    "playwright:install": "node node_modules/@playwright/test/cli.js install chromium"
+    "playwright:install": "playwright install --with-deps chromium"
   },
   "dependencies": {
     "@capacitor-community/contacts": "^7.1.0",
