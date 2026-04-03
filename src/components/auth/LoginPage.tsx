@@ -4,7 +4,6 @@ import {
   Button,
   TextField,
   Typography,
-  CircularProgress,
   Paper,
   Snackbar,
   Alert,
@@ -12,17 +11,18 @@ import {
 import { useAuthStore } from "../../store/auth";
 
 export function LoginPage() {
-  const { sendMagicLink, loading } = useAuthStore();
+  const { sendMagicLink } = useAuthStore();
   const [email, setEmail] = useState("");
   const [snackOpen, setSnackOpen] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Show confirmation immediately — before the async call completes.
+    const emailToSend = email;
+    // Show confirmation immediately and clear the field.
     // Always shown regardless of outcome to prevent enumeration attacks.
     setSnackOpen(true);
     setEmail("");
-    await sendMagicLink(email);
+    await sendMagicLink(emailToSend);
   };
 
   return (
@@ -65,8 +65,7 @@ export function LoginPage() {
         <Box component="form" onSubmit={handleSubmit}>
           <TextField
             fullWidth
-            type="text"
-            inputMode="email"
+            type="email"
             label="E-Mail"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
@@ -78,21 +77,17 @@ export function LoginPage() {
             variant="contained"
             fullWidth
             size="large"
-            disabled={loading || !email}
+            disabled={!email}
             sx={{ borderRadius: 2 }}
           >
-            {loading ? (
-              <CircularProgress size={22} color="inherit" />
-            ) : (
-              "Login-Link anfordern"
-            )}
+            Login-Link anfordern
           </Button>
         </Box>
       </Paper>
 
       <Snackbar
         open={snackOpen}
-        autoHideDuration={20000}
+        autoHideDuration={6000}
         onClose={() => setSnackOpen(false)}
         anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
       >
