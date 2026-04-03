@@ -14,7 +14,8 @@
     "preview": "vite preview",
     "test:e2e": "pnpm build && playwright test",
     "test:e2e:ui": "playwright test --ui",
-    "playwright:install": "playwright install --with-deps chromium"
+    "playwright:install": "playwright install --with-deps chromium",
+    "test:e2e:ci": "playwright test"
   },
   "dependencies": {
     "@capacitor-community/contacts": "^7.1.0",
