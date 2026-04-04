@@ -15,6 +15,7 @@ import { subscribeToChanges } from "./sync/supabaseSync";
 import type { TimestampedContact } from "./sync/merge";
 import { InstallPrompt } from "./components/pwa/InstallPrompt";
 import { ErrorSnackbar } from "./components/feedback/ErrorSnackbar";
+import { useContactsPermission } from "./hooks/useContactsPermission";
 
 // Wrapper with key reset: remounts ContactEditPage when the ID changes
 // (rerender-derived-state-no-effect: no useEffect needed for form initialization)
@@ -43,6 +44,7 @@ const App: React.FC = () => {
   const { user } = useAuthStore();
   const { sync } = useSyncStore();
   const { loadContacts } = useContactsStore();
+  useContactsPermission();
 
   const channelRef = useRef<RealtimeChannel | null>(null);
 
