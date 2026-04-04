@@ -37,13 +37,13 @@ nema Web (PC)
 
 Ziel: APK bauen, auf echtem Gerät testen — noch **ohne** Telefonbuch-Zugriff.
 
-- [ ] `npx cap add android` → `android/`-Ordner erzeugen
-- [ ] `capacitor.config.ts` prüfen / anpassen (appId, appName, webDir)
-- [ ] AndroidManifest: `READ_CONTACTS` + `WRITE_CONTACTS` eintragen
+- [x] `npx cap add android` → `android/`-Ordner erzeugen
+- [x] `capacitor.config.ts` prüfen / anpassen (appId, appName, webDir)
+- [x] AndroidManifest: `READ_CONTACTS` + `WRITE_CONTACTS` eintragen
 - [ ] Runtime Permission Request implementieren (Android 6+)
-- [ ] Build-Skript in `package.json`: `build:android` = `pnpm build && npx cap sync android`
-- [ ] GitHub Actions Workflow: Debug-APK bauen + als Artifact ablegen
-- [ ] Merge auf `dev`, Dirk testet APK auf echtem Gerät
+- [x] Build-Skript in `package.json`: `build:android` = `pnpm build && npx cap sync android`
+- [x] GitHub Actions: build-deploy.yml (alle Branches), Composite Actions für E2E + Android
+- [ ] Dirk testet APK auf echtem Gerät
 
 ## Phase 2 — Datenmodell erweitern
 
