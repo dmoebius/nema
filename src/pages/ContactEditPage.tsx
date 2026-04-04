@@ -135,6 +135,7 @@ export const ContactEditPage: React.FC = () => {
     if (isNew || !id) return [];
     return getContact(id)?.tags ?? [];
   });
+  const [tagInputValue, setTagInputValue] = useState("");
   const [sponsorId, setSponsorId] = useState<string>(() => {
     if (isNew || !id) return "";
     return getContact(id)?.sponsorId ?? "";
@@ -190,6 +191,13 @@ export const ContactEditPage: React.FC = () => {
         await deleteAvatar(user.id, id);
       }
 
+      // Flush any pending tag input that wasn't confirmed via Enter/Tab
+      const pendingTag = tagInputValue.trim();
+      const finalTags =
+        pendingTag && !tags.includes(pendingTag)
+          ? [...tags, pendingTag]
+          : tags;
+
       const data: ContactFormData = {
         firstName: firstName.trim(),
         lastName: lastName.trim(),
@@ -200,7 +208,7 @@ export const ContactEditPage: React.FC = () => {
         phones: phones.filter((p) => p.number.trim()),
         emails: emails.filter((e) => e.address.trim()),
         addresses: addresses.filter((a) => a.street.trim() || a.city.trim()),
-        tags,
+        tags: finalTags,
         sponsorId: sponsorId || undefined,
       };
 
@@ -576,7 +584,12 @@ export const ContactEditPage: React.FC = () => {
             freeSolo
             options={allTags}
             value={tags}
-            onChange={(_, newValue) => setTags(newValue as string[])}
+            inputValue={tagInputValue}
+            onInputChange={(_, newInputValue) => setTagInputValue(newInputValue)}
+            onChange={(_, newValue) => {
+              setTags(newValue as string[]);
+              setTagInputValue("");
+            }}
             renderTags={(value, getTagProps) =>
               value.map((option, index) => (
                 <Chip
