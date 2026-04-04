@@ -2,7 +2,6 @@ name: Build, Test & Deploy
 
 on:
   push:
-    branches: [dev, main]
   workflow_dispatch:
 
 concurrency:
@@ -48,6 +47,7 @@ jobs:
         uses: ./.github/actions/android
 
       - name: Deploy to Cloudflare Pages
+        if: github.ref_name == 'main' || github.ref_name == 'dev'
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
