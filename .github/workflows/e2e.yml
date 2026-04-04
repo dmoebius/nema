@@ -1,9 +1,16 @@
 name: E2E Tests (Playwright)
 
 on:
-  push:
-    branches-ignore: [main]
-  workflow_dispatch:
+  workflow_call:
+    secrets:
+      SUPABASE_URL:
+        required: true
+      SUPABASE_ANON_KEY:
+        required: true
+      E2E_TEST_EMAIL:
+        required: true
+      E2E_TEST_PASSWORD:
+        required: true
 
 jobs:
   e2e:
@@ -38,7 +45,6 @@ jobs:
       - name: Run e2e tests
         run: pnpm run test:e2e:ci
         env:
-          # No E2E_BASE_URL → playwright.config.ts starts vite preview on localhost:5173
           VITE_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           VITE_SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
           E2E_TEST_EMAIL: ${{ secrets.E2E_TEST_EMAIL }}

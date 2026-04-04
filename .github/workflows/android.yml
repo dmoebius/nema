@@ -1,13 +1,12 @@
 name: Build Android APK
 
 on:
-  push:
-    branches:
-      - dev
-      - 'feature/capacitor*'
-  pull_request:
-    branches:
-      - dev
+  workflow_call:
+    secrets:
+      SUPABASE_URL:
+        required: true
+      SUPABASE_ANON_KEY:
+        required: true
 
 jobs:
   build:
@@ -40,8 +39,9 @@ jobs:
       - name: Build web assets
         run: pnpm build
         env:
-          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
-          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+          VITE_BASE_PATH: /
+          VITE_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
 
       - name: Sync Capacitor
         run: npx cap sync android
