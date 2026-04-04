@@ -1,26 +1,28 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import {
   Box,
   Button,
   TextField,
   Typography,
-  Alert,
-  CircularProgress,
   Paper,
+  Snackbar,
+  Alert,
 } from "@mui/material";
-import EmailIcon from "@mui/icons-material/Email";
 import { useAuthStore } from "../../store/auth";
 
-export const LoginPage: React.FC = () => {
-  const { sendMagicLink, loading } = useAuthStore();
+export function LoginPage() {
+  const { sendMagicLink } = useAuthStore();
   const [email, setEmail] = useState("");
-  const [sent, setSent] = useState(false);
+  const [snackOpen, setSnackOpen] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    await sendMagicLink(email);
-    // Always show the same message regardless of outcome — prevents enumeration attacks
-    setSent(true);
+    const emailToSend = email;
+    // Show confirmation immediately and clear the field.
+    // Always shown regardless of outcome to prevent enumeration attacks.
+    setSnackOpen(true);
+    setEmail("");
+    await sendMagicLink(emailToSend);
   };
 
   return (
@@ -60,39 +62,45 @@ export const LoginPage: React.FC = () => {
           Gib deine E-Mail-Adresse ein — wir schicken dir einen Login-Link.
         </Typography>
 
-        {sent ? (
-          <Alert severity="success" icon={<EmailIcon />}>
-            Danke. Wenn die E-Mail-Adresse korrekt und berechtigt ist, dann erhältst du jetzt einen Login-Link. Schau in dein Postfach und klicke auf den Link.
-          </Alert>
-        ) : (
-          <Box component="form" onSubmit={handleSubmit}>
-            <TextField
-              fullWidth
-              type="email"
-              label="E-Mail"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              autoFocus
-              sx={{ mb: 2 }}
-            />
-            <Button
-              type="submit"
-              variant="contained"
-              fullWidth
-              size="large"
-              disabled={loading || !email}
-              sx={{ borderRadius: 2 }}
-            >
-              {loading ? (
-                <CircularProgress size={22} color="inherit" />
-              ) : (
-                "Login-Link anfordern"
-              )}
-            </Button>
-          </Box>
-        )}
+        <Box component="form" onSubmit={handleSubmit}>
+          <TextField
+            fullWidth
+            type="email"
+            label="E-Mail"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+            sx={{ mb: 2 }}
+          />
+          <Button
+            type="submit"
+            variant="contained"
+            fullWidth
+            size="large"
+            disabled={!email}
+            sx={{ borderRadius: 2 }}
+          >
+            Login-Link anfordern
+          </Button>
+        </Box>
       </Paper>
+
+      <Snackbar
+        open={snackOpen}
+        autoHideDuration={6000}
+        onClose={() => setSnackOpen(false)}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+      >
+        <Alert
+          onClose={() => setSnackOpen(false)}
+          severity="success"
+          variant="filled"
+          sx={{ width: "100%" }}
+          data-testid="magic-link-snackbar"
+        >
+          Falls diese E-Mail-Adresse berechtigt ist, erhältst du gleich einen Login-Link. Schau in dein Postfach.
+        </Alert>
+      </Snackbar>
     </Box>
   );
-};
+}

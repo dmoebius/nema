@@ -3,9 +3,12 @@ import { createClient } from "@supabase/supabase-js";
 import { AppMenuPage } from "./pages/AppMenuPage";
 import { ContactListPage } from "./pages/ContactListPage";
 
-// This test logs out — it must use a fresh isolated browser context so it does
-// not invalidate the shared storageState used by all other test files.
-test.describe("authentication", () => {
+
+// ──────────────────────────────────────────────────────────────────────────────
+// Logout test — uses an isolated browser context so it does not invalidate
+// the shared storageState used by all other test files.
+// ──────────────────────────────────────────────────────────────────────────────
+test.describe("authentication — logout", () => {
   test("logout via hamburger menu shows login page and clears local data", async () => {
     const supabaseUrl = process.env.VITE_SUPABASE_URL!;
     const supabaseAnonKey = process.env.VITE_SUPABASE_ANON_KEY!;
@@ -53,3 +56,5 @@ test.describe("authentication", () => {
     await browser.close();
   });
 });
+
+

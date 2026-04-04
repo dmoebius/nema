@@ -31,13 +31,13 @@ export const useAuthStore = create<AuthState>((set) => ({
   },
 
   sendMagicLink: async (email: string) => {
-    set({ loading: true });
-    // Intentionally discard result — never expose auth failures to client (prevents enumeration attacks)
+    // Do NOT set loading: true here — AuthGuard replaces LoginPage with a spinner
+    // when loading is true, which would unmount the Snackbar before it renders.
+    // The submit button is disabled via local !email state after clearing the field.
     await supabase.auth.signInWithOtp({
       email,
       options: { shouldCreateUser: false }, // Only allow pre-existing users
     });
-    set({ loading: false });
   },
 
   signOut: async () => {
