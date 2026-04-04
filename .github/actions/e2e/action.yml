@@ -1,0 +1,51 @@
+name: E2E Tests (Playwright)
+description: Run Playwright E2E tests against the already-built dist/
+
+inputs:
+  supabase-url:
+    required: true
+  supabase-anon-key:
+    required: true
+  e2e-test-email:
+    required: true
+  e2e-test-password:
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Install Playwright browsers
+      shell: bash
+      run: pnpm exec playwright install chromium --with-deps
+
+    - name: Run e2e tests
+      shell: bash
+      run: pnpm run test:e2e:ci
+      env:
+        VITE_SUPABASE_URL: ${{ inputs.supabase-url }}
+        VITE_SUPABASE_ANON_KEY: ${{ inputs.supabase-anon-key }}
+        E2E_TEST_EMAIL: ${{ inputs.e2e-test-email }}
+        E2E_TEST_PASSWORD: ${{ inputs.e2e-test-password }}
+
+    - name: Upload Playwright report artifact
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: playwright-report
+        path: playwright-report/
+        retention-days: 14
+
+    - name: Post report URL as job summary
+      if: always()
+      shell: bash
+      env:
+        GH_TOKEN: ${{ github.token }}
+      run: |
+        ARTIFACT_ID=$(gh api repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/artifacts \
+          --jq '.artifacts[] | select(.name=="playwright-report") | .id')
+        REPO="${{ github.repository }}"
+        RUN_ID="${{ github.run_id }}"
+        echo "## 🎭 Playwright Report" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "- [📦 Download report ZIP](https://github.com/${REPO}/actions/runs/${RUN_ID}/artifacts/${ARTIFACT_ID})" >> $GITHUB_STEP_SUMMARY
+        echo "- [🔍 All artifacts for this run](https://github.com/${REPO}/actions/runs/${RUN_ID}#artifacts)" >> $GITHUB_STEP_SUMMARY

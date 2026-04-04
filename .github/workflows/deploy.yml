@@ -1,67 +1,57 @@
-name: Deploy to Cloudflare Pages (main)
+name: Build, Test & Deploy
 
 on:
   push:
-    branches: [main]
+    branches: [dev, main]
   workflow_dispatch:
 
 concurrency:
-  group: deploy-main
+  group: deploy-${{ github.ref_name }}
   cancel-in-progress: true
 
 jobs:
-  build:
+  build-test-deploy:
     runs-on: ubuntu-latest
-    environment: prod
+    environment: ${{ github.ref_name == 'main' && 'prod' || 'dev' }}
+
     steps:
       - uses: actions/checkout@v4
+
       - uses: pnpm/action-setup@v4
         with:
           version: 10
+
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
           cache: pnpm
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm build
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build
+        run: pnpm build
         env:
           VITE_BASE_PATH: /
           VITE_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           VITE_SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
-      - uses: actions/upload-artifact@v4
+
+      - name: E2E Tests
+        uses: ./.github/actions/e2e
         with:
-          name: dist
-          path: dist/
-          retention-days: 1
+          supabase-url: ${{ secrets.SUPABASE_URL }}
+          supabase-anon-key: ${{ secrets.SUPABASE_ANON_KEY }}
+          e2e-test-email: ${{ secrets.E2E_TEST_EMAIL }}
+          e2e-test-password: ${{ secrets.E2E_TEST_PASSWORD }}
 
-  e2e:
-    needs: build
-    uses: ./.github/workflows/e2e.yml
-    secrets:
-      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-      SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
-      E2E_TEST_EMAIL: ${{ secrets.E2E_TEST_EMAIL }}
-      E2E_TEST_PASSWORD: ${{ secrets.E2E_TEST_PASSWORD }}
+      - name: Build Android APK
+        uses: ./.github/actions/android
 
-  android:
-    needs: e2e
-    uses: ./.github/workflows/android.yml
-    secrets:
-      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-      SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
-
-  deploy:
-    needs: android
-    runs-on: ubuntu-latest
-    environment: prod
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/download-artifact@v4
-        with:
-          name: dist
-          path: dist/
-      - uses: cloudflare/wrangler-action@v3
+      - name: Deploy to Cloudflare Pages
+        uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: pages deploy dist --project-name=nema-app
+          command: >
+            pages deploy dist --project-name=nema-app
+            ${{ github.ref_name == 'dev' && '--branch=dev' || '' }}

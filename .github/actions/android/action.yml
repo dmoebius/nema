@@ -1,0 +1,27 @@
+name: Build Android APK
+description: Sync Capacitor and build debug APK from already-built dist/
+
+runs:
+  using: composite
+  steps:
+    - name: Set up Java
+      uses: actions/setup-java@v4
+      with:
+        distribution: temurin
+        java-version: '21'
+
+    - name: Sync Capacitor
+      shell: bash
+      run: npx cap sync android
+
+    - name: Build debug APK
+      shell: bash
+      run: ./gradlew assembleDebug
+      working-directory: android
+
+    - name: Upload APK artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: nema-debug-${{ github.sha }}
+        path: android/app/build/outputs/apk/debug/app-debug.apk
+        retention-days: 14
