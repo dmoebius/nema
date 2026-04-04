@@ -1,22 +1,23 @@
 package com.getcapacitor.myapp;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.Assert.*;
 
 import android.content.Context;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.platform.app.InstrumentationRegistry;
-import de.mannodermaus.junit5.ActivityScenarioExtension;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.RegisterExtension;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
 /**
  * Instrumented test, which will execute on an Android device.
  *
  * @see <a href="http://d.android.com/tools/testing">Testing documentation</a>
  */
-class ExampleInstrumentedTest {
+@RunWith(AndroidJUnit4.class)
+public class ExampleInstrumentedTest {
 
     @Test
-    void useAppContext() {
+    public void useAppContext() throws Exception {
         Context appContext = InstrumentationRegistry.getInstrumentation().getTargetContext();
         assertEquals("de.dmoebius.nema", appContext.getPackageName());
     }
