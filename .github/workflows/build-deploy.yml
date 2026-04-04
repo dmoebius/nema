@@ -1,0 +1,57 @@
+name: Build, Test & Deploy
+
+on:
+  push:
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-${{ github.ref_name }}
+  cancel-in-progress: true
+
+jobs:
+  build-test-deploy:
+    runs-on: ubuntu-latest
+    environment: ${{ github.ref_name == 'main' && 'prod' || 'dev' }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build
+        run: pnpm build
+        env:
+          VITE_BASE_PATH: /
+          VITE_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+
+      - name: E2E Tests
+        uses: ./.github/actions/e2e
+        with:
+          supabase-url: ${{ secrets.SUPABASE_URL }}
+          supabase-anon-key: ${{ secrets.SUPABASE_ANON_KEY }}
+          e2e-test-email: ${{ secrets.E2E_TEST_EMAIL }}
+          e2e-test-password: ${{ secrets.E2E_TEST_PASSWORD }}
+
+      - name: Build Android APK
+        uses: ./.github/actions/android
+
+      - name: Deploy to Cloudflare Pages
+        if: github.ref_name == 'main' || github.ref_name == 'dev'
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: >
+            pages deploy dist --project-name=nema-app
+            ${{ github.ref_name == 'dev' && '--branch=dev' || '' }}
