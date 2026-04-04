@@ -590,6 +590,24 @@ export const ContactEditPage: React.FC = () => {
               setTags(newValue as string[]);
               setTagInputValue("");
             }}
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                size="small"
+                label="Tags eingeben oder auswählen"
+                placeholder="z.B. Interessent, Kunde…"
+                onKeyDown={(e) => {
+                  if (e.key === " " || e.key === ",") {
+                    e.preventDefault();
+                    const newTag = tagInputValue.trim().replace(/,$/, "");
+                    if (newTag && !tags.includes(newTag)) {
+                      setTags((prev) => [...prev, newTag]);
+                    }
+                    setTagInputValue("");
+                  }
+                }}
+              />
+            )}
             renderTags={(value, getTagProps) =>
               value.map((option, index) => (
                 <Chip
@@ -601,14 +619,6 @@ export const ContactEditPage: React.FC = () => {
                 />
               ))
             }
-            renderInput={(params) => (
-              <TextField
-                {...params}
-                size="small"
-                label="Tags eingeben oder auswählen"
-                placeholder="z.B. Interessent, Kunde…"
-              />
-            )}
           />
         </CardContent>
       </Card>
