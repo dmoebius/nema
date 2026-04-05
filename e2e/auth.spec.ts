@@ -46,11 +46,11 @@ test.describe("authentication — logout", () => {
     await appMenu.logout();
 
     // AuthGuard renders LoginPage in-place — verify login button is visible
-    await expect(page.getByRole("button", { name: "Login-Link anfordern" })).toBeVisible();
+    await expect(page.getByTestId("login-button")).toBeVisible();
 
     // Navigating to "/" without auth must still show login (no cached contacts accessible)
     await page.goto("/");
-    await expect(page.getByRole("button", { name: "Login-Link anfordern" })).toBeVisible();
+    await expect(page.getByTestId("login-button")).toBeVisible();
 
     await context.close();
     await browser.close();

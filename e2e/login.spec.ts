@@ -1,6 +1,9 @@
 import { test, expect } from "@playwright/test";
 import { LoginPage } from "./pages/LoginPage";
 
+// Login page tests must run without a stored auth session
+test.use({ storageState: { cookies: [], origins: [] } });
+
 test.describe("login page", () => {
   test("shows email and password fields", async ({ page }) => {
     await page.goto("/");

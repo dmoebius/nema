@@ -113,26 +113,24 @@ jobs:
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_URL }}
         run: |
-          COMMIT_MSG=$(git log -1 --pretty=format:"%s" 2>/dev/null | head -c 100 || echo "unknown")
+          BRANCH='${{ github.ref_name }}'
+          RUN_NUMBER='${{ github.run_number }}'
+          RUN_URL='${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}'
+          ACTOR='${{ github.actor }}'
           COMMIT_SHA=$(git rev-parse --short HEAD 2>/dev/null || echo "unknown")
-          python3 - <<PYEOF
-          import json, os, urllib.request
-          webhook = os.environ["DISCORD_WEBHOOK"]
-          payload = {
-            "embeds": [{
-              "title": "❌ nema Pipeline fehlgeschlagen",
-              "color": 15158332,
-              "fields": [
-                {"name": "Branch", "value": "`${{ github.ref_name }}`", "inline": True},
-                {"name": "Run", "value": "[#${{ github.run_number }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})", "inline": True},
-                {"name": "Commit", "value": f"${COMMIT_SHA} ${COMMIT_MSG}", "inline": False},
-                {"name": "Ausgelöst von", "value": "${{ github.actor }}", "inline": True},
-              ],
-              "footer": {"text": "nema CI"}
-            }]
-          }
-          data = json.dumps(payload).encode()
-          req = urllib.request.Request(webhook, data=data, headers={"Content-Type": "application/json"})
-          urllib.request.urlopen(req)
-          print("Discord notified")
-          PYEOF
+          COMMIT_MSG=$(git log -1 --pretty=format:%s 2>/dev/null | head -c 80 | tr -d '"\\' || echo "unknown")
+          curl -sf -X POST "$DISCORD_WEBHOOK" \
+            -H "Content-Type: application/json" \
+            --data-binary "{
+              \"embeds\": [{
+                \"title\": \"❌ nema Pipeline fehlgeschlagen\",
+                \"color\": 15158332,
+                \"fields\": [
+                  {\"name\": \"Branch\", \"value\": \"\`${BRANCH}\`\", \"inline\": true},
+                  {\"name\": \"Run\", \"value\": \"[#${RUN_NUMBER}](${RUN_URL})\", \"inline\": true},
+                  {\"name\": \"Commit\", \"value\": \"\`${COMMIT_SHA}\` ${COMMIT_MSG}\", \"inline\": false},
+                  {\"name\": \"Ausgelöst von\", \"value\": \"${ACTOR}\", \"inline\": true}
+                ],
+                \"footer\": {\"text\": \"nema CI\"}
+              }]
+            }"
