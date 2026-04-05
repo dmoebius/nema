@@ -55,3 +55,43 @@ jobs:
           command: >
             pages deploy dist --project-name=nema-app
             ${{ github.ref_name == 'dev' && '--branch=dev' || '' }}
+
+      - name: Notify Discord (success)
+        if: success()
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_URL }}
+        run: |
+          curl -sf -X POST "$DISCORD_WEBHOOK" \
+            -H "Content-Type: application/json" \
+            -d "{\"content\": \"✅ **nema Pipeline** — \`${{ github.ref_name }}\` erfolgreich ([Run #${{ github.run_number }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}))\"}"
+
+      - name: Collect failure logs
+        if: failure()
+        run: |
+          echo "PIPELINE_FAILED=true" >> $GITHUB_ENV
+          # Letzten 50 Zeilen aus dem Job-Log sind nicht direkt abrufbar,
+          # aber wir sammeln was wir haben (z.B. pnpm/build output landet im Step-Log).
+          # Als Fallback posten wir Link + Commit-Info.
+
+      - name: Notify Discord (failure)
+        if: failure()
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_URL }}
+        run: |
+          COMMIT_MSG=$(git log -1 --pretty=format:"%s" | head -c 100)
+          COMMIT_SHA=$(git rev-parse --short HEAD)
+          curl -sf -X POST "$DISCORD_WEBHOOK" \
+            -H "Content-Type: application/json" \
+            -d "{
+              \"embeds\": [{
+                \"title\": \"❌ nema Pipeline fehlgeschlagen\",
+                \"color\": 15158332,
+                \"fields\": [
+                  {\"name\": \"Branch\", \"value\": \"\`${{ github.ref_name }}\`\", \"inline\": true},
+                  {\"name\": \"Run\", \"value\": \"[#${{ github.run_number }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})\", \"inline\": true},
+                  {\"name\": \"Commit\", \"value\": \"\`${COMMIT_SHA}\` ${COMMIT_MSG}\", \"inline\": false},
+                  {\"name\": \"Ausgelöst von\", \"value\": \"${{ github.actor }}\", \"inline\": true}
+                ],
+                \"footer\": {\"text\": \"Antworte mit 'fixen' um Alfred zu aktivieren\"}
+              }]
+            }"
