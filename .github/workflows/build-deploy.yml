@@ -95,21 +95,30 @@ jobs:
         if: failure()
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          BRANCH: ${{ github.ref_name }}
+          RUN_NUMBER: ${{ github.run_number }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          ACTOR: ${{ github.actor }}
         run: |
           COMMIT_MSG=$(git log -1 --pretty=format:"%s" | head -c 100)
           COMMIT_SHA=$(git rev-parse --short HEAD)
+          PAYLOAD=$(jq -n \
+            --arg branch "$BRANCH" \
+            --arg run "#${RUN_NUMBER}" \
+            --arg run_url "$RUN_URL" \
+            --arg commit "${COMMIT_SHA} ${COMMIT_MSG}" \
+            --arg actor "$ACTOR" \
+            '{embeds: [{
+              title: "❌ nema Pipeline fehlgeschlagen",
+              color: 15158332,
+              fields: [
+                {name: "Branch", value: ("`" + $branch + "`"), inline: true},
+                {name: "Run", value: ("[" + $run + "](" + $run_url + ")"), inline: true},
+                {name: "Commit", value: $commit, inline: false},
+                {name: "Ausgelöst von", value: $actor, inline: true}
+              ],
+              footer: {text: "nema CI"}
+            }]}')
           curl -sf -X POST "$DISCORD_WEBHOOK" \
             -H "Content-Type: application/json" \
-            -d "{
-              \"embeds\": [{
-                \"title\": \"❌ nema Pipeline fehlgeschlagen\",
-                \"color\": 15158332,
-                \"fields\": [
-                  {\"name\": \"Branch\", \"value\": \"\`${{ github.ref_name }}\`\", \"inline\": true},
-                  {\"name\": \"Run\", \"value\": \"[#${{ github.run_number }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})\", \"inline\": true},
-                  {\"name\": \"Commit\", \"value\": \"\`${COMMIT_SHA}\` ${COMMIT_MSG}\", \"inline\": false},
-                  {\"name\": \"Ausgelöst von\", \"value\": \"${{ github.actor }}\", \"inline\": true}
-                ],
-                \"footer\": {\"text\": \"Antworte mit 'fixen' um Alfred zu aktivieren\"}
-              }]
-            }"
+            -d "$PAYLOAD"
