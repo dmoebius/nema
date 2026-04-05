@@ -72,6 +72,10 @@ jobs:
             --notes "Automated build from branch \`${{ github.ref_name }}\` — commit \`$(git rev-parse --short HEAD)\`" \
             $PRERELEASE
 
+          RELEASE_URL="https://github.com/${{ github.repository }}/releases/tag/${TAG}"
+          echo "### 📦 APK Release" >> $GITHUB_STEP_SUMMARY
+          echo "[${TITLE}](${RELEASE_URL})" >> $GITHUB_STEP_SUMMARY
+
       - name: Deploy to Cloudflare Pages
         if: github.ref_name == 'main' || github.ref_name == 'dev'
         uses: cloudflare/wrangler-action@v3
