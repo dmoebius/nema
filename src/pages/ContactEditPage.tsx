@@ -135,6 +135,7 @@ export const ContactEditPage: React.FC = () => {
     if (isNew || !id) return [];
     return getContact(id)?.tags ?? [];
   });
+  const [tagInputValue, setTagInputValue] = useState("");
   const [sponsorId, setSponsorId] = useState<string>(() => {
     if (isNew || !id) return "";
     return getContact(id)?.sponsorId ?? "";
@@ -190,6 +191,13 @@ export const ContactEditPage: React.FC = () => {
         await deleteAvatar(user.id, id);
       }
 
+      // Flush pending tag input not yet confirmed via Enter/Tab/click
+      const pendingTag = tagInputValue.trim();
+      const finalTags =
+        pendingTag && !tags.includes(pendingTag)
+          ? [...tags, pendingTag]
+          : tags;
+
       const data: ContactFormData = {
         firstName: firstName.trim(),
         lastName: lastName.trim(),
@@ -200,7 +208,7 @@ export const ContactEditPage: React.FC = () => {
         phones: phones.filter((p) => p.number.trim()),
         emails: emails.filter((e) => e.address.trim()),
         addresses: addresses.filter((a) => a.street.trim() || a.city.trim()),
-        tags,
+        tags: finalTags,
         sponsorId: sponsorId || undefined,
       };
 
@@ -561,7 +569,7 @@ export const ContactEditPage: React.FC = () => {
             onChange={(e) => setBirthday(e.target.value)}
             fullWidth
             size="small"
-            InputLabelProps={{ shrink: true }}
+            slotProps={{ inputLabel: { shrink: true } }}
             label="Datum"
           />
         </CardContent>
@@ -576,8 +584,13 @@ export const ContactEditPage: React.FC = () => {
             freeSolo
             options={allTags}
             value={tags}
-            onChange={(_, newValue) => setTags(newValue as string[])}
-            renderTags={(value, getTagProps) =>
+            inputValue={tagInputValue}
+            onInputChange={(_, newInputValue) => setTagInputValue(newInputValue)}
+            onChange={(_, newValue) => {
+              setTags(newValue as string[]);
+              setTagInputValue("");
+            }}
+            renderValue={(value, getTagProps) =>
               value.map((option, index) => (
                 <Chip
                   label={option}
@@ -594,6 +607,16 @@ export const ContactEditPage: React.FC = () => {
                 size="small"
                 label="Tags eingeben oder auswählen"
                 placeholder="z.B. Interessent, Kunde…"
+                onKeyDown={(e) => {
+                  if (e.key === " " || e.key === ",") {
+                    e.preventDefault();
+                    const newTag = tagInputValue.trim().replace(/,$/, "");
+                    if (newTag && !tags.includes(newTag)) {
+                      setTags((prev) => [...prev, newTag]);
+                    }
+                    setTagInputValue("");
+                  }
+                }}
               />
             )}
           />
