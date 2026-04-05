@@ -8,6 +8,7 @@ import { ContactListPage } from "./pages/ContactListPage";
 import { ContactDetailPage } from "./pages/ContactDetailPage";
 import { ContactEditPage } from "./pages/ContactEditPage";
 import { AuthGuard } from "./components/auth/AuthGuard";
+import { ResetPasswordPage } from "./components/auth/ResetPasswordPage";
 import { useAuthStore } from "./store/auth";
 import { useSyncStore } from "./store/sync";
 import { useContactsStore } from "./store/contacts";
@@ -35,6 +36,7 @@ const AppRoutes: React.FC = () => {
         <Route path="/contacts/:id" element={<ContactDetailPage />} />
         <Route path="/contacts/:id/edit" element={<ContactEditPageKeyed />} />
       </Route>
+      <Route path="/reset-password" element={<ResetPasswordPage />} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );

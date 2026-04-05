@@ -10,7 +10,8 @@ interface AuthState {
 
   // Actions
   initialize: () => Promise<void>;
-  sendMagicLink: (email: string) => Promise<void>;
+  signIn: (email: string, password: string) => Promise<void>;
+  resetPassword: (email: string) => Promise<void>;
   signOut: () => Promise<void>;
 }
 
@@ -30,17 +31,16 @@ export const useAuthStore = create<AuthState>((set) => ({
     });
   },
 
-  sendMagicLink: async (email: string) => {
-    // Do NOT set loading: true here — AuthGuard replaces LoginPage with a spinner
-    // when loading is true, which would unmount the Snackbar before it renders.
-    // The submit button is disabled via local !email state after clearing the field.
-    await supabase.auth.signInWithOtp({
-      email,
-      options: {
-        shouldCreateUser: false, // Only allow pre-existing users
-        emailRedirectTo: window.location.origin, // Works for both localhost and prod
-      },
+  signIn: async (email: string, password: string) => {
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) throw error;
+  },
+
+  resetPassword: async (email: string) => {
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/reset-password`,
     });
+    if (error) throw error;
   },
 
   signOut: async () => {
