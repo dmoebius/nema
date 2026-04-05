@@ -65,14 +65,6 @@ jobs:
             -H "Content-Type: application/json" \
             -d "{\"content\": \"✅ **nema Pipeline** — \`${{ github.ref_name }}\` erfolgreich ([Run #${{ github.run_number }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}))\"}"
 
-      - name: Collect failure logs
-        if: failure()
-        run: |
-          echo "PIPELINE_FAILED=true" >> $GITHUB_ENV
-          # Letzten 50 Zeilen aus dem Job-Log sind nicht direkt abrufbar,
-          # aber wir sammeln was wir haben (z.B. pnpm/build output landet im Step-Log).
-          # Als Fallback posten wir Link + Commit-Info.
-
       - name: Notify Discord (failure)
         if: failure()
         env:
