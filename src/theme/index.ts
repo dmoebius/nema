@@ -99,9 +99,11 @@ const theme = createTheme({
       styleOverrides: {
         containedPrimary: {
           background: `linear-gradient(135deg, ${FOREST_GREEN} 0%, ${FOREST_GREEN_DARK} 100%)`,
+          color: "#ffffff",
           boxShadow: `0 2px 8px rgba(27, 67, 50, 0.3)`,
           "&:hover": {
             background: `linear-gradient(135deg, ${FOREST_GREEN_LIGHT} 0%, ${FOREST_GREEN} 100%)`,
+            color: "#ffffff",
           },
         },
       },
