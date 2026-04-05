@@ -46,6 +46,29 @@ jobs:
       - name: Build Android APK
         uses: ./.github/actions/android
 
+      - name: Create GitHub Release with APK
+        if: github.ref_name == 'main' || github.ref_name == 'dev'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if [ "${{ github.ref_name }}" = "main" ]; then
+            VERSION=$(node -p "require('./package.json').version")
+            TAG="v${VERSION}"
+            TITLE="Release v${VERSION}"
+            PRERELEASE=""
+          else
+            SHORT_SHA=$(git rev-parse --short HEAD)
+            DATE=$(date -u +%Y-%m-%d)
+            TAG="preview-${DATE}-${SHORT_SHA}"
+            TITLE="Preview ${DATE} (${SHORT_SHA})"
+            PRERELEASE="--prerelease"
+          fi
+          gh release delete "$TAG" --yes 2>/dev/null || true
+          gh release create "$TAG" nema-debug.apk \
+            --title "$TITLE" \
+            --notes "Automated build from branch \`${{ github.ref_name }}\` — commit \`$(git rev-parse --short HEAD)\`" \
+            $PRERELEASE
+
       - name: Deploy to Cloudflare Pages
         if: github.ref_name == 'main' || github.ref_name == 'dev'
         uses: cloudflare/wrangler-action@v3

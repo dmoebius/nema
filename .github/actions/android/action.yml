@@ -19,9 +19,6 @@ runs:
       run: ./gradlew assembleDebug
       working-directory: android
 
-    - name: Upload APK artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: nema-debug-${{ github.sha }}
-        path: android/app/build/outputs/apk/debug/app-debug.apk
-        retention-days: 14
+    - name: Copy APK to workspace root
+      shell: bash
+      run: cp android/app/build/outputs/apk/debug/app-debug.apk nema-debug.apk
