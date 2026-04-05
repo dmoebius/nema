@@ -191,7 +191,7 @@ export const ContactEditPage: React.FC = () => {
         await deleteAvatar(user.id, id);
       }
 
-      // Flush any pending tag input that wasn't confirmed via Enter/Tab
+      // Flush pending tag input not yet confirmed via Enter/Tab/click
       const pendingTag = tagInputValue.trim();
       const finalTags =
         pendingTag && !tags.includes(pendingTag)
@@ -569,7 +569,7 @@ export const ContactEditPage: React.FC = () => {
             onChange={(e) => setBirthday(e.target.value)}
             fullWidth
             size="small"
-            InputLabelProps={{ shrink: true }}
+            slotProps={{ inputLabel: { shrink: true } }}
             label="Datum"
           />
         </CardContent>
@@ -590,6 +590,17 @@ export const ContactEditPage: React.FC = () => {
               setTags(newValue as string[]);
               setTagInputValue("");
             }}
+            renderValue={(value, getTagProps) =>
+              value.map((option, index) => (
+                <Chip
+                  label={option}
+                  size="small"
+                  {...getTagProps({ index })}
+                  key={option}
+                  sx={{ fontWeight: 500 }}
+                />
+              ))
+            }
             renderInput={(params) => (
               <TextField
                 {...params}
@@ -608,17 +619,6 @@ export const ContactEditPage: React.FC = () => {
                 }}
               />
             )}
-            renderTags={(value, getTagProps) =>
-              value.map((option, index) => (
-                <Chip
-                  label={option}
-                  size="small"
-                  {...getTagProps({ index })}
-                  key={option}
-                  sx={{ fontWeight: 500 }}
-                />
-              ))
-            }
           />
         </CardContent>
       </Card>
