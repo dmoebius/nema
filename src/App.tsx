@@ -44,7 +44,7 @@ const App: React.FC = () => {
   const { user } = useAuthStore();
   const { sync } = useSyncStore();
   const { loadContacts } = useContactsStore();
-  useContactsPermission();
+  useContactsPermission(!!user); // Only request after successful login
 
   const channelRef = useRef<RealtimeChannel | null>(null);
 

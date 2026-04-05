@@ -8,13 +8,13 @@ export type PermissionStatus = "granted" | "denied" | "prompt" | "unavailable";
  * Requests READ_CONTACTS + WRITE_CONTACTS permission on native Android/iOS.
  * On web, returns "unavailable" immediately (no-op).
  */
-export function useContactsPermission(): PermissionStatus {
+export function useContactsPermission(enabled = true): PermissionStatus {
   const [status, setStatus] = useState<PermissionStatus>(() =>
     Capacitor.isNativePlatform() ? "prompt" : "unavailable"
   );
 
   useEffect(() => {
-    if (!Capacitor.isNativePlatform()) return;
+    if (!Capacitor.isNativePlatform() || !enabled) return;
 
     const requestPermission = async () => {
       try {
