@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Background -->
+  <rect width="512" height="512" rx="96" fill="#2d6a4f"/>
+  <!-- Letter N as path, centered, white -->
+  <path
+    d="M 118 96 L 118 416 L 198 416 L 198 226 L 314 416 L 394 416 L 394 96 L 314 96 L 314 286 L 198 96 Z"
+    fill="white"
+  />
+</svg>
