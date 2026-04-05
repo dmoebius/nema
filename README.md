@@ -31,6 +31,15 @@ cp .env.test.local.example .env.test.local
 
 Fehlen diese Dateien, zeigt die App eine rote Fehlermeldung im Browser statt einer weißen Seite.
 
+### Supabase Dashboard (einmalig)
+
+Unter **Authentication → URL Configuration → Additional Redirect URLs** eintragen:
+```
+http://localhost:5173/**
+http://localhost:4173/**
+```
+Damit funktionieren Magic Links auch lokal (`dev`) und im Preview-Modus.
+
 ### Befehle
 
 | Befehl         | Beschreibung                                       |
