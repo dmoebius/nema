@@ -27,23 +27,25 @@ nema Web (PC)
 
 ---
 
-## Phase 0 — Baseline ✅ (Voraussetzung)
+## Phase 0 — Baseline ✅
 
-- [ ] PR #5 reviewen und mergen (Dirk)
-- [ ] dev → main mergen
-- [ ] Sauberer Stand auf main als Ausgangspunkt
+- [x] PR #5 reviewen und mergen (Dirk)
+- [x] dev → main mergen
+- [x] Sauberer Stand auf main als Ausgangspunkt
 
-## Phase 1 — Android Setup + Permissions
+## Phase 1 — Android Setup + Permissions ✅
 
 Ziel: APK bauen, auf echtem Gerät testen — noch **ohne** Telefonbuch-Zugriff.
 
 - [x] `npx cap add android` → `android/`-Ordner erzeugen
 - [x] `capacitor.config.ts` prüfen / anpassen (appId, appName, webDir)
 - [x] AndroidManifest: `READ_CONTACTS` + `WRITE_CONTACTS` eintragen
-- [ ] Runtime Permission Request implementieren (Android 6+)
+- [x] Runtime Permission Request implementieren (nach Login, Android 6+)
 - [x] Build-Skript in `package.json`: `build:android` = `pnpm build && npx cap sync android`
 - [x] GitHub Actions: build-deploy.yml (alle Branches), Composite Actions für E2E + Android
-- [ ] Dirk testet APK auf echtem Gerät
+- [x] GitHub Releases: APK direkt downloadbar (preview für dev, release für main)
+- [x] Forest Green N-Icon für PWA + Android (alle Dichten, adaptive + splash)
+- [x] Dirk testet APK auf echtem Gerät ✅
 
 ## Phase 2 — Datenmodell erweitern
 
