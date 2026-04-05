@@ -4,6 +4,9 @@ on:
   push:
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 concurrency:
   group: deploy-${{ github.ref_name }}
   cancel-in-progress: true
