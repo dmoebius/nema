@@ -36,7 +36,10 @@ export const useAuthStore = create<AuthState>((set) => ({
     // The submit button is disabled via local !email state after clearing the field.
     await supabase.auth.signInWithOtp({
       email,
-      options: { shouldCreateUser: false }, // Only allow pre-existing users
+      options: {
+        shouldCreateUser: false, // Only allow pre-existing users
+        emailRedirectTo: window.location.origin, // Works for both localhost and prod
+      },
     });
   },
 
