@@ -1,5 +1,19 @@
 name: Build Android APK
-description: Sync Capacitor and build debug APK from already-built dist/
+description: Sync Capacitor and build signed release APK from already-built dist/
+
+inputs:
+  keystore-base64:
+    description: Base64-encoded keystore file
+    required: true
+  keystore-password:
+    description: Keystore password
+    required: true
+  key-alias:
+    description: Key alias in the keystore
+    required: true
+  key-password:
+    description: Key password
+    required: true
 
 runs:
   using: composite
@@ -10,15 +24,30 @@ runs:
         distribution: temurin
         java-version: '21'
 
+    - name: Decode keystore
+      shell: bash
+      run: |
+        echo "${{ inputs.keystore-base64 }}" | base64 -d > android/app/release.jks
+
     - name: Sync Capacitor
       shell: bash
       run: pnpm build:android
 
-    - name: Build debug APK
+    - name: Build release APK
       shell: bash
-      run: ./gradlew assembleDebug
+      env:
+        KEYSTORE_PATH: release.jks
+        KEYSTORE_PASSWORD: ${{ inputs.keystore-password }}
+        KEY_ALIAS: ${{ inputs.key-alias }}
+        KEY_PASSWORD: ${{ inputs.key-password }}
+      run: ./gradlew assembleRelease
       working-directory: android
 
     - name: Copy APK to workspace root
       shell: bash
-      run: cp android/app/build/outputs/apk/debug/app-debug.apk nema-debug.apk
+      run: cp android/app/build/outputs/apk/release/app-release.apk nema-release.apk
+
+    - name: Clean up keystore
+      shell: bash
+      if: always()
+      run: rm -f android/app/release.jks
