@@ -90,7 +90,7 @@ jobs:
             --notes "$NOTES" \
             $PRERELEASE
 
-          RELEASE_URL="https://github.com/dmoebius/nema/releases/tag/${TAG}"
+          RELEASE_URL="https://github.com/${{ github.repository }}/releases/tag/${TAG}"
           echo "### 📦 APK Release" >> $GITHUB_STEP_SUMMARY
           echo "[${TITLE}](${RELEASE_URL})" >> $GITHUB_STEP_SUMMARY
 
@@ -111,7 +111,7 @@ jobs:
         run: |
           curl -sf -X POST "$DISCORD_WEBHOOK" \
             -H "Content-Type: application/json" \
-            -d "{\"content\": \"✅ **nema Pipeline** — \`${{ github.ref_name }}\` erfolgreich ([Run #${{ github.run_number }}](https://github.com/dmoebius/nema/actions/runs/${{ github.run_id }}))\"}"
+            -d "{\"content\": \"✅ **nema Pipeline** — \`${{ github.ref_name }}\` erfolgreich ([Run #${{ github.run_number }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}))\"}"
 
       - name: Notify Discord (failure)
         if: failure()
@@ -120,7 +120,7 @@ jobs:
         run: |
           BRANCH='${{ github.ref_name }}'
           RUN_NUMBER='${{ github.run_number }}'
-          RUN_URL='https://github.com/dmoebius/nema/actions/runs/${{ github.run_id }}'
+          RUN_URL='${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}'
           ACTOR='${{ github.actor }}'
           COMMIT_SHA=$(git rev-parse --short HEAD 2>/dev/null || echo "unknown")
           COMMIT_MSG=$(git log -1 --pretty=format:%s 2>/dev/null | head -c 80 | tr -d '"\\' || echo "unknown")
