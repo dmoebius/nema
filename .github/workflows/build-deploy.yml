@@ -90,7 +90,7 @@ jobs:
             --notes "$NOTES" \
             $PRERELEASE
 
-          RELEASE_URL="https://github.com/${{ github.repository }}/releases/tag/${TAG}"
+          RELEASE_URL="https://github.com/dmoebius/nema/releases/tag/${TAG}"
           echo "### 📦 APK Release" >> $GITHUB_STEP_SUMMARY
           echo "[${TITLE}](${RELEASE_URL})" >> $GITHUB_STEP_SUMMARY
 
