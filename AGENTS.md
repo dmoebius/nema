@@ -71,7 +71,7 @@ Verfügbare Skills:
 
 ## E2E Tests (Playwright)
 
-- **Lokal vor jedem Commit ausführen:** `./e2e-local.sh` (gitignored, liegt im Repo-Root). Dieses Script setzt automatisch `PLAYWRIGHT_BROWSERS_PATH=/home/node/.playwright` und `LD_LIBRARY_PATH=/home/node/.local/chromium-libs/extracted/...` — damit läuft Chromium ohne root und ohne install-deps. NIEMALS vergessen dieses Script zu verwenden — `pnpm exec playwright test` direkt funktioniert in dieser Sandbox nicht wegen fehlender System-Libraries.
+- **Lokal vor jedem Commit ausführen:** `pnpm test:e2e:openclaw` — setzt automatisch `PLAYWRIGHT_BROWSERS_PATH` und `LD_LIBRARY_PATH` für die OpenClaw-Sandbox. NIEMALS `pnpm test:e2e` direkt verwenden — Chromium startet ohne die gesetzten Pfade nicht.
 - **Page Objects** — immer! Alle UI-Elemente und Interaktionen in Page Object Classes kapseln (`e2e/pages/`). Nie direkt Locatoren im Test-Code verwenden.
 - **Keine individuellen Timeouts** bei `expect()`/`waitFor()` — immer den konfigurierten Default-Timeout von Playwright verwenden. Ausnahmen nur wenn fachlich begründet und kommentiert.
 - Test-Beschreibungen (`describe`, `test`) immer auf Englisch.
