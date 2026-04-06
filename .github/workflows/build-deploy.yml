@@ -51,7 +51,7 @@ jobs:
         with:
           keystore-base64: ${{ secrets.KEYSTORE_BASE64 }}
           keystore-password: ${{ secrets.KEYSTORE_PASSWORD }}
-          key-alias: ${{ secrets.KEY_ALIAS }}
+          key-alias: ${{ vars.KEY_ALIAS }}
           key-password: ${{ secrets.KEY_PASSWORD }}
 
       - name: Create GitHub Release with APK
