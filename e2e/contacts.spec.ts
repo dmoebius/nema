@@ -93,15 +93,19 @@ test.describe("contact management", () => {
     await expect(listPage.contactRow(minimalDisplay)).toBeVisible();
     await expect(listPage.contactRow(fullDisplay)).toBeVisible();
 
-    // Timestamps must be unchanged after reload+sync (no spurious re-save)
+    // Timestamps must be unchanged after reload+sync (no spurious re-save).
+    // Compare as epoch ms — Supabase may return a different ISO-8601 format
+    // (e.g. "+00:00" suffix vs "Z", microseconds vs milliseconds) after sync.
+    const toMs = (ts: string | null) => ts ? new Date(ts).getTime() : null;
+
     await listPage.contactRow(minimalDisplay).click();
     await expect(detailPage.updatedAt).toBeVisible();
-    expect(await detailPage.getUpdatedAtValue()).toBe(minimalUpdatedAt);
+    expect(toMs(await detailPage.getUpdatedAtValue())).toBe(toMs(minimalUpdatedAt));
     await detailPage.navigateBack();
 
     await listPage.contactRow(fullDisplay).click();
     await expect(detailPage.updatedAt).toBeVisible();
-    expect(await detailPage.getUpdatedAtValue()).toBe(fullUpdatedAt);
+    expect(toMs(await detailPage.getUpdatedAtValue())).toBe(toMs(fullUpdatedAt));
     await detailPage.navigateBack();
 
     // Delete minimal contact — list must only show full contact afterwards
