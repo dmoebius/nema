@@ -16,11 +16,11 @@ runs:
   steps:
     - name: Install Playwright browsers
       shell: bash
-      run: pnpm exec playwright install chromium --with-deps
+      run: pnpm playwright:install
 
     - name: Run e2e tests
       shell: bash
-      run: pnpm run test:e2e:ci
+      run: pnpm test:e2e:ci
       env:
         VITE_SUPABASE_URL: ${{ inputs.supabase-url }}
         VITE_SUPABASE_ANON_KEY: ${{ inputs.supabase-anon-key }}

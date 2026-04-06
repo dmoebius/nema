@@ -5,8 +5,8 @@ import { fileURLToPath } from "url";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-// Load test env vars from .env.test.local (not committed)
-dotenv.config({ path: path.resolve(__dirname, ".env.test.local") });
+// Load test env vars from .env.local (not committed)
+dotenv.config({ path: path.resolve(__dirname, ".env.local") });
 
 export default defineConfig({
   testDir: "./e2e",

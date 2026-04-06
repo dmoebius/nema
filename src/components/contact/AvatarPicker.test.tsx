@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from "vitest";
 
 // AvatarPicker unit tests focus on logic, not rendering (React 19 + jsdom act() issue)
-// Full rendering tests will be covered by Storybook interaction tests
+// e2e tests will cover full rendering tests
 
 describe("AvatarPicker props validation", () => {
   it("accepts required onFileSelected prop", () => {
@@ -11,9 +11,10 @@ describe("AvatarPicker props validation", () => {
 
   it("onDelete is optional", () => {
     // Props interface allows onDelete to be undefined
-    const props: { onFileSelected: (f: File) => void; onDelete?: () => void } = {
-      onFileSelected: vi.fn(),
-    };
+    const props: { onFileSelected: (f: File) => void; onDelete?: () => void } =
+      {
+        onFileSelected: vi.fn(),
+      };
     expect(props.onDelete).toBeUndefined();
   });
 

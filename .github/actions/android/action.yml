@@ -12,7 +12,7 @@ runs:
 
     - name: Sync Capacitor
       shell: bash
-      run: npx cap sync android
+      run: pnpm build:android
 
     - name: Build debug APK
       shell: bash

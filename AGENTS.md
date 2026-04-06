@@ -25,9 +25,7 @@ NeMa (von **Ne**twork**Ma**rketing) ist ein lightweight CRM / Kontaktmanagement-
 
 ### Capacitor
 
-- Native Shell für Android + iOS
 - Graceful Degradation: `Capacitor.isNativePlatform()` entscheidet ob Telefonbuch-Sync aktiv ist
-- Web-Deployment (GitHub Pages) läuft weiterhin parallel
 
 ### Supabase (Cloud Sync)
 
@@ -35,7 +33,7 @@ NeMa (von **Ne**twork**Ma**rketing) ist ein lightweight CRM / Kontaktmanagement-
 - IndexedDB = lokaler Cache (Offline-Fähigkeit)
 - Sync-Strategie: 3-Way-Merge, pro Attribut, last-write-wins anhand `updated_at` Timestamp
 - Profilbilder: Supabase Storage (`avatars/<contact-id>.jpg`), client-side resize auf 256×256 vor Upload
-- Auth: Supabase Auth (Magic Link per E-Mail)
+- Auth: Supabase Auth (Email + Passwort, "Passwort vergessen" Funktion)
 - Realtime: Supabase Realtime für Live-Updates über mehrere Geräte
 
 ### Branches & Deployments
@@ -68,9 +66,8 @@ Verfügbare Skills:
 
 ## Git / GitHub Workflow
 
-- **Branch nach Merge löschen** — beim Mergen via API immer direkt danach `DELETE /repos/{owner}/{repo}/git/refs/heads/{branch}` aufrufen.
-- **Pipeline nach Merge beobachten** — nach jedem Merge auf `dev` oder `main` die Pipeline des Zielbranches prüfen und bei Fehlern sofort analysieren.
 - **Squash-Merge** für Feature-Branches auf `dev`.
+- **Branch nach Merge löschen** — beim Mergen via API immer direkt danach `DELETE /repos/{owner}/{repo}/git/refs/heads/{branch}` aufrufen.
 
 ## E2E Tests (Playwright)
 
@@ -85,4 +82,4 @@ Verfügbare Skills:
 
 - React-Komponenten für Pages sollten klein gehalten werden, nicht groß und monolithisch. Eine Page besteht aus mehreren Komponenten. Komponenten sollen möglichs wiederverwendet werden.
 - React-Komponenten sollten immer unter `src/components/` abgelegt werden. Zusammenhängende Komponenten sollten in Unterordnern unter `src/components/` abgelegt werden.
-- Jede React-Komponente sollte immer durch einen Test abgesichert werden. Pages erhalten eine Storybook Seite und einen Storybook Test.
+- Jede React-Komponente sollte immer durch einen Test abgesichert werden.

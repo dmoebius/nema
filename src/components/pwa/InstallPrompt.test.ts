@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 
 const DISMISSED_KEY = "nema_install_dismissed_until";
 
-// Isolate localStorage logic tests — rendering tests covered by Storybook
+// Isolate localStorage logic tests — rendering tests covered by Playwright
 describe("InstallPrompt dismiss logic", () => {
   beforeEach(() => {
     localStorage.clear();

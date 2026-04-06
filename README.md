@@ -13,38 +13,21 @@ Kernfunktionen:
 
 ## Entwicklung
 
-### Umgebungsvariablen
+| Befehl             | Beschreibung                                                                   |
+|--------------------|--------------------------------------------------------------------------------|
+| `pnpm dev`         | Starte Webapp im DEV Modus, http://localhost:5173                              |
+| `pnpm build`       | Erzeuge Artifakte in `dist/`                                                   |
+| `pnpm preview`     | Starte Webapp im PROD Modus, http://localhost:4173 ; setzt `pnpm:build` voraus |
+| `pnpm test:e2e`    | E2E-Tests headless; setzt `pnpm build && pnpm preview` voraus                  |
+| `pnpm test:e2e:ui` | E2E-Tests mit UI; setzt `pnpm build && pnpm preview` voraus                    |
 
-Vor dem ersten Start werden zwei Dateien benötigt (beide sind gitignored):
 
-**`.env.local`** – für `pnpm dev` / `pnpm build`:
-```
-VITE_SUPABASE_URL=https://your-dev-project.supabase.co
-VITE_SUPABASE_ANON_KEY=your-anon-key
-```
+### Setup
 
-**`.env.test.local`** – zusätzlich für E2E-Tests (Vorlage: `.env.test.local.example`):
+Vor dem ersten Start von `pnpm dev` / `pnpm build` und den E2E-Tests wird eine Datei `.env.local` benötigt (gitignored). Als Vorlage dient `.env.local.example`:
 ```
-cp .env.test.local.example .env.test.local
+cp .env.local.example .env.local
 # Werte eintragen
 ```
 
-Fehlen diese Dateien, zeigt die App eine rote Fehlermeldung im Browser statt einer weißen Seite.
-
-### Supabase Dashboard (einmalig)
-
-Unter **Authentication → URL Configuration → Additional Redirect URLs** eintragen:
-```
-http://localhost:5173/**
-http://localhost:4173/**
-```
-Damit funktionieren Magic Links auch lokal (`dev`) und im Preview-Modus.
-
-### Befehle
-
-| Befehl         | Beschreibung                                       |
-|----------------|----------------------------------------------------|
-| `pnpm dev`     | Starte Webapp im DEV Modus, http://localhost:5173  |
-| `pnpm build`   | Erzeuge Artifakte in `dist/`                       |
-| `pnpm preview` | Starte Webapp im PROD Modus, http://localhost:4173 |
-
+Vor dem ersten Start der E2E-Tests mit `pnpm test:e2e` oder `pnpm:test:e2e:ui` muss einmalig `pnpm playwright:install` aufgerufen werden, um die Playwright Browser zu installieren.

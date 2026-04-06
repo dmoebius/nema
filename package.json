@@ -12,11 +12,11 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "preview": "vite preview",
-    "test:e2e": "pnpm build && playwright test",
+    "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
+    "test:e2e:ci": "playwright test",
     "playwright:install": "playwright install --with-deps chromium",
-    "build:android": "pnpm build && npx cap sync android",
-    "test:e2e:ci": "playwright test"
+    "build:android": "npx cap sync android"
   },
   "dependencies": {
     "@capacitor-community/contacts": "^7.1.0",
