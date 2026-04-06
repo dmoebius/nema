@@ -8,6 +8,12 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 // Load test env vars from .env.local (not committed)
 dotenv.config({ path: path.resolve(__dirname, ".env.local") });
 
+// Auto-configure browser path when running inside OpenClaw sandbox
+// LD_LIBRARY_PATH must be set externally (shell/package.json script) — use pnpm test:e2e:openclaw
+if (process.env.OPENCLAW_GATEWAY_TOKEN) {
+  process.env.PLAYWRIGHT_BROWSERS_PATH = "/home/node/.playwright";
+}
+
 export default defineConfig({
   testDir: "./e2e",
   fullyParallel: false, // Sequential to avoid IndexedDB conflicts between tests

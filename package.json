@@ -15,6 +15,7 @@
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
     "test:e2e:ci": "playwright test",
+    "test:e2e:openclaw": "PLAYWRIGHT_BROWSERS_PATH=/home/node/.playwright LD_LIBRARY_PATH=/home/node/.local/chromium-libs/extracted/lib/x86_64-linux-gnu:/home/node/.local/chromium-libs/extracted/usr/lib/x86_64-linux-gnu playwright test",
     "playwright:install": "playwright install --with-deps chromium",
     "build:android": "npx cap sync android"
   },

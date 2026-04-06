@@ -31,3 +31,5 @@ public/swe-worker*
 /playwright-report/
 /test-results/
 /playwright/.auth/
+.env.test.local
+e2e-local.sh
