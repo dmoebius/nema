@@ -11,8 +11,8 @@ export class ContactDetailPage {
     this.page = page;
     this.backButton = page.getByRole("button", { name: "Zurück" });
     this.updatedAt = page.getByTestId("contact-updated-at");
-    this.deleteButton = page.getByRole("button", { name: "Löschen" }).first();
-    this.confirmDeleteButton = page.getByRole("button", { name: "Löschen" }).last();
+    this.deleteButton = page.getByRole("button", { name: "Kontakt löschen" });
+    this.confirmDeleteButton = page.getByRole("button", { name: "Löschen", exact: true }).last();
   }
 
   async getUpdatedAtValue(): Promise<string | null> {

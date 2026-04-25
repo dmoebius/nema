@@ -294,6 +294,7 @@ export const ContactDetailPage: React.FC = () => {
           </Tooltip>
           <Tooltip title="Löschen">
             <IconButton
+              aria-label="Kontakt löschen"
               onClick={() => setDeleteOpen(true)}
               size="small"
               sx={{

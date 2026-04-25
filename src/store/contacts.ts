@@ -172,7 +172,8 @@ export const useContactsStore = create<ContactsState>((set, get) => ({
 
   setShowDeleted: (v) => set({ showDeleted: v }),
 
-  getContact: (id) => get().contacts.find((c) => c.id === id),
+  // Only return active (non-deleted) contacts — deleted contacts are no longer accessible via detail view
+  getContact: (id) => get().contacts.find((c) => c.id === id && !c.deletedAt),
 
   getFilteredContacts: () => {
     const { contacts, searchQuery, selectedTags, showDeleted } = get();
