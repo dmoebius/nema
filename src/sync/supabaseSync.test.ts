@@ -5,6 +5,7 @@ import { toTimestamped } from "./merge";
 // Mock IndexedDB helpers
 vi.mock("../db", () => ({
   getAllContacts: vi.fn(),
+  getActiveContacts: vi.fn(),
   saveContact: vi.fn(),
   deleteContact: vi.fn(),
   getSyncBase: vi.fn(),
@@ -41,9 +42,11 @@ const makeContact = (overrides: Partial<Contact> = {}): Contact => ({
 
 const makeSupabaseChain = (data: unknown[], error: unknown = null) => ({
   select: vi.fn().mockReturnThis(),
+  is: vi.fn().mockReturnThis(),
   order: vi.fn().mockResolvedValue({ data, error }),
   upsert: vi.fn().mockResolvedValue({ error: null }),
   delete: vi.fn().mockReturnThis(),
+  update: vi.fn().mockReturnThis(),
   eq: vi.fn().mockResolvedValue({ error: null }),
 });
 
@@ -67,7 +70,7 @@ describe("syncAll", () => {
     };
 
     vi.mocked(supabase.from).mockReturnValue(makeSupabaseChain([remoteRow]) as never);
-    vi.mocked(db.getAllContacts).mockResolvedValue([]);
+    vi.mocked(db.getActiveContacts).mockResolvedValue([]);
     vi.mocked(db.getSyncBase).mockResolvedValue(undefined);
 
     await syncAll(userId);
@@ -80,7 +83,7 @@ describe("syncAll", () => {
     const local = makeContact({ id: "local-1" });
 
     vi.mocked(supabase.from).mockReturnValue(makeSupabaseChain([]) as never);
-    vi.mocked(db.getAllContacts).mockResolvedValue([local]);
+    vi.mocked(db.getActiveContacts).mockResolvedValue([local]);
     vi.mocked(db.getSyncBase).mockResolvedValue(undefined);
 
     await syncAll(userId);
@@ -104,7 +107,7 @@ describe("syncAll", () => {
     };
 
     vi.mocked(supabase.from).mockReturnValue(makeSupabaseChain([remoteRow]) as never);
-    vi.mocked(db.getAllContacts).mockResolvedValue([contact]);
+    vi.mocked(db.getActiveContacts).mockResolvedValue([contact]);
     vi.mocked(db.getSyncBase).mockResolvedValue(toTimestamped(contact));
 
     await syncAll(userId);

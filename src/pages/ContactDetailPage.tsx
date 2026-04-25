@@ -545,12 +545,11 @@ export const ContactDetailPage: React.FC = () => {
         <DialogTitle
           sx={{ fontFamily: '"DM Serif Display", serif', fontWeight: 400 }}
         >
-          Kontakt löschen?
+          Kontakt ausblenden?
         </DialogTitle>
         <DialogContent>
           <DialogContentText>
-            Möchtest du <strong>{fullName}</strong> wirklich löschen? Diese
-            Aktion kann nicht rückgängig gemacht werden.
+            Kontakt {fullName} ausblenden? Er kann unter „Ausgeblendete“ wiederhergestellt werden.
           </DialogContentText>
         </DialogContent>
         <DialogActions>
