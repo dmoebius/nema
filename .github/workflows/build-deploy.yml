@@ -54,11 +54,17 @@ jobs:
           key-alias: ${{ vars.KEY_ALIAS }}
           key-password: ${{ secrets.KEY_PASSWORD }}
 
+      - name: Sanitize branch name for artifact
+        if: github.ref_name != 'main' && github.ref_name != 'dev'
+        id: sanitize
+        run: echo "branch=${GITHUB_REF_NAME//\//-}" >> "$GITHUB_OUTPUT"
+
       - name: Upload APK Artifact (feature branches)
         if: github.ref_name != 'main' && github.ref_name != 'dev'
         uses: actions/upload-artifact@v4
         with:
-          name: nema-${{ github.ref_name }}-${{ github.run_number }}.apk
+          # Use sanitized branch name (slashes replaced with dashes) — upload-artifact@v4 forbids slashes
+          name: nema-${{ steps.sanitize.outputs.branch }}-${{ github.run_number }}.apk
           path: nema-release.apk
           retention-days: 14
 
