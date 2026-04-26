@@ -118,6 +118,27 @@ jobs:
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_URL }}
         run: |
+          COMMIT_SHA=$(git rev-parse --short HEAD 2>/dev/null || echo "unknown")
+          COMMIT_MSG=$(git log -1 --pretty=format:%s 2>/dev/null | head -c 80 || echo "unknown")
+          PAYLOAD=$(jq -n \
+            --arg branch '${{ github.ref_name }}' \
+            --arg run '#${{ github.run_number }}' \
+            --arg run_url '${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}' \
+            --arg commit "${COMMIT_SHA} ${COMMIT_MSG}" \
+            --arg actor '${{ github.actor }}' \
+            '{
+              embeds: [{
+                title: "❌ nema Pipeline fehlgeschlagen",
+                color: 15158332,
+                fields: [
+                  {name: "Branch",        value: ("`" + $branch + "`"), inline: true},
+                  {name: "Run",           value: ("[" + $run + "](" + $run_url + ")"), inline: true},
+                  {name: "Commit",        value: $commit, inline: false},
+                  {name: "Ausgelöst von", value: $actor,  inline: true}
+                ],
+                footer: {text: "nema CI"}
+              }]
+            }')
           curl -sf -X POST "$DISCORD_WEBHOOK" \
             -H "Content-Type: application/json" \
-            -d "{\"content\": \"❌ **nema Pipeline** — \`${{ github.ref_name }}\` fehlgeschlagen ([Run #${{ github.run_number }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}))\"}"
+            -d "$PAYLOAD"
