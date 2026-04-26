@@ -71,6 +71,7 @@ export class ContactEditPage {
 
     if (contact.tags && contact.tags.length > 0) {
       const tagInput = this.page.getByLabel("Tags eingeben oder auswählen");
+      await tagInput.waitFor({ state: "visible" });
       for (const tag of contact.tags) {
         await tagInput.fill(tag);
         await this.page.keyboard.press("Enter");

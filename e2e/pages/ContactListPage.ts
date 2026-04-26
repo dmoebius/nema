@@ -46,6 +46,7 @@ export class ContactListPage {
   }
 
   async toggleShowDeleted() {
+    await this.showDeletedChip.waitFor({ state: "visible" });
     await this.showDeletedChip.click();
   }
 
