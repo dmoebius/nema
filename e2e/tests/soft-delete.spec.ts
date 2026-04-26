@@ -38,11 +38,16 @@ async function createContact(
   await expect(page).toHaveURL(/\/contacts\/[^/]+$/);
 }
 
-async function softDeleteCurrentContact(page: import("@playwright/test").Page): Promise<void> {
+async function softDeleteCurrentContact(
+  page: import("@playwright/test").Page,
+  listPage: ContactListPage,
+): Promise<void> {
   const detailPage = new ContactDetailPage(page);
   await detailPage.deleteContact();
-  // After soft-delete: redirected back to list
+  // After soft-delete: redirected back to list, wait for sync to settle
   await expect(page).toHaveURL("/");
+  await listPage.waitForReady();
+  await page.waitForLoadState("networkidle");
 }
 
 test.describe("soft-delete flow", () => {
@@ -54,7 +59,7 @@ test.describe("soft-delete flow", () => {
     await listPage.goto();
     await listPage.waitForReady();
 
-    // ── Step 1: Create minimal contact ────────────────────────────────────────
+    // Step 1: Create minimal contact
     await createContact(page, listPage, MINIMAL_CONTACT);
 
     // Navigate back and verify visible in active list
@@ -62,35 +67,34 @@ test.describe("soft-delete flow", () => {
     await expect(page).toHaveURL("/");
     await expect(listPage.contactRow(minimalDisplay)).toBeVisible();
 
-    // ── Step 2: Create full contact ────────────────────────────────────────────
+    // Step 2: Create full contact
     await createContact(page, listPage, FULL_CONTACT);
 
     await page.getByRole("button", { name: "Zurück" }).click();
     await expect(page).toHaveURL("/");
     await expect(listPage.contactRow(fullDisplay)).toBeVisible();
 
-    // ── Step 3: Soft-delete minimal contact ────────────────────────────────────
+    // Step 3: Soft-delete minimal contact
     await listPage.contactRow(minimalDisplay).click();
     await expect(page).toHaveURL(/\/contacts\/[^/]+$/);
-    await softDeleteCurrentContact(page);
+    await softDeleteCurrentContact(page, listPage);
 
     // Minimal contact must be gone from active list
     await expect(listPage.contactRow(minimalDisplay)).not.toBeVisible();
-    // Full contact still in active list — wait for DOM to stabilise after background sync
+    // Full contact still in active list
     const fullRow = listPage.contactRow(fullDisplay);
     await expect(fullRow).toBeVisible();
-    await fullRow.waitFor({ state: "visible" });
 
-    // ── Step 4: Soft-delete full contact ──────────────────────────────────────
+    // Step 4: Soft-delete full contact
     await fullRow.click();
     await expect(page).toHaveURL(/\/contacts\/[^/]+$/);
-    await softDeleteCurrentContact(page);
+    await softDeleteCurrentContact(page, listPage);
 
     // Both contacts must be gone from active list
     await expect(listPage.contactRow(minimalDisplay)).not.toBeVisible();
     await expect(listPage.contactRow(fullDisplay)).not.toBeVisible();
 
-    // ── Step 5: Toggle "Ausgeblendete" view ───────────────────────────────────
+    // Step 5: Toggle "Ausgeblendete" view
     await listPage.toggleShowDeleted();
 
     // FAB must be hidden in deleted view
@@ -100,7 +104,8 @@ test.describe("soft-delete flow", () => {
     await expect(listPage.contactRow(minimalDisplay)).toBeVisible();
     await expect(listPage.contactRow(fullDisplay)).toBeVisible();
 
-    // ── Step 6: Restore minimal contact ──────────────────────────────────────
+    // Step 6: Restore minimal contact
+    await page.waitForLoadState("networkidle");
     await listPage.restoreButtonByLabel(minimalDisplay).click();
     // After restore, minimal contact disappears from deleted view
     await expect(listPage.contactRow(minimalDisplay)).not.toBeVisible();
@@ -111,22 +116,24 @@ test.describe("soft-delete flow", () => {
     // Full contact must NOT be in active view (still deleted)
     await expect(listPage.contactRow(fullDisplay)).not.toBeVisible();
 
-    // ── Step 7: Switch back to deleted view, permanently delete full contact ──
+    // Step 7: Switch back to deleted view, permanently delete full contact
     await listPage.toggleShowDeleted();
     await expect(listPage.contactRow(fullDisplay)).toBeVisible();
 
+    await page.waitForLoadState("networkidle");
     await listPage.permanentDeleteButtonByLabel(fullDisplay).click();
     // After permanent delete: full contact gone from deleted view
     await expect(listPage.contactRow(fullDisplay)).not.toBeVisible();
 
-    // ── Step 8: Cleanup — soft-delete restored minimal contact ────────────────
+    // Step 8: Cleanup — soft-delete restored minimal contact
     await listPage.toggleShowDeleted();
     await listPage.contactRow(minimalDisplay).click();
     await expect(page).toHaveURL(/\/contacts\/[^/]+$/);
-    await softDeleteCurrentContact(page);
+    await softDeleteCurrentContact(page, listPage);
 
     // Final cleanup: permanently delete from deleted view
     await listPage.toggleShowDeleted();
+    await page.waitForLoadState("networkidle");
     await listPage.permanentDeleteButtonByLabel(minimalDisplay).click();
     await expect(listPage.contactRow(minimalDisplay)).not.toBeVisible();
   });
