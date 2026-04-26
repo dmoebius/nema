@@ -45,9 +45,7 @@ export async function getDB(): Promise<IDBPDatabase<NemaDB>> {
         db.createObjectStore("syncBase", { keyPath: "id" });
       }
       if (oldVersion < 3) {
-        // Cast to IDBTransaction to access objectStore by name during upgrade
-        const rawTx = tx as unknown as IDBTransaction;
-        const contactStore = rawTx.objectStore("contacts");
+        const contactStore = tx.objectStore("contacts");
         contactStore.createIndex("by-deviceContactId", "deviceContactId", { unique: false });
         contactStore.createIndex("by-deletedAt", "deletedAt", { unique: false });
       }
