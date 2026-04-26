@@ -66,9 +66,17 @@ export async function pushContact(contact: TimestampedContact, userId: string): 
   if (error) throw new Error(error.message);
 }
 
-// Soft-delete a contact in Supabase (sets deleted_at instead of hard delete)
-export async function removeContactFromSupabase(id: string): Promise<void> {
-  const { error } = await supabase.from("contacts").update({ deleted_at: new Date().toISOString() }).eq("id", id);
+// Soft-delete a contact in Supabase (sets deleted_at + updated_at instead of hard delete).
+// Pass the same `updatedAt` timestamp used for the local IDB write so that the stale-event
+// guard in subscribeToChanges (local.updatedAt > remote.updatedAt) works correctly: without
+// a matching updated_at bump the Realtime UPDATE would look equal-age to the local record
+// and any subsequent late-arriving creation event could overwrite the soft-delete.
+export async function removeContactFromSupabase(id: string, updatedAt?: string): Promise<void> {
+  const now = updatedAt ?? new Date().toISOString();
+  const { error } = await supabase
+    .from("contacts")
+    .update({ deleted_at: now, updated_at: now })
+    .eq("id", id);
   if (error) throw new Error(error.message);
 }
 

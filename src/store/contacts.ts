@@ -102,17 +102,20 @@ export const useContactsStore = create<ContactsState>((set, get) => ({
   },
 
   removeContact: async (id) => {
-    // Soft-delete: set deletedAt, replicate to Supabase as soft-delete UPDATE
-    await softDeleteContact(id);
+    // Soft-delete: set deletedAt + updatedAt so the stale-event guard in the Realtime
+    // handler (local.updatedAt > remote.updatedAt) can correctly skip any late-arriving
+    // Realtime events from before the soft-delete (e.g. the creation sync upsert).
+    const deletedAt = await softDeleteContact(id);
+    const now = deletedAt ?? new Date().toISOString();
     // Update in-memory immediately so UI reflects the change even if Supabase call fails
     set((state) => ({
-      contacts: state.contacts.map((c) => (c.id === id ? { ...c, deletedAt: new Date().toISOString() } : c)),
+      contacts: state.contacts.map((c) => (c.id === id ? { ...c, deletedAt: now, updatedAt: now } : c)),
     }));
     // Replicate to Supabase fire-and-forget: IDB + store are already updated,
     // so local navigation is unblocked. Supabase will reconcile on next sync if this fails.
     const userId = useAuthStore.getState().user?.id;
     if (userId) {
-      removeContactFromSupabase(id).catch(() => {
+      removeContactFromSupabase(id, now).catch(() => {
         // best-effort; will reconcile on next sync
       });
     }

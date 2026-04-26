@@ -74,11 +74,13 @@ export async function deleteContact(id: string): Promise<void> {
   await db.delete("contacts", id);
 }
 
-export async function softDeleteContact(id: string): Promise<void> {
+export async function softDeleteContact(id: string): Promise<string | undefined> {
   const db = await getDB();
   const contact = await db.get("contacts", id);
-  if (!contact) return;
-  await db.put("contacts", { ...contact, deletedAt: new Date().toISOString() });
+  if (!contact) return undefined;
+  const now = new Date().toISOString();
+  await db.put("contacts", { ...contact, deletedAt: now, updatedAt: now });
+  return now;
 }
 
 export async function getActiveContacts(): Promise<Contact[]> {

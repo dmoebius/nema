@@ -143,17 +143,21 @@ describe("useContactsStore — soft-delete, restore, permanentlyDelete", () => {
   it("removeContact soft-deletes the contact in IndexedDB and Supabase", async () => {
     const contact = makeContact({ id: "c1" });
     useContactsStore.setState({ contacts: [contact] });
-    mockDb.softDeleteContact.mockResolvedValue(undefined);
+    const fakeNow = "2026-01-01T00:00:00.000Z";
+    // softDeleteContact now returns the updatedAt timestamp it used
+    mockDb.softDeleteContact.mockResolvedValue(fakeNow);
     mockSupabase.removeContactFromSupabase.mockResolvedValue(undefined);
 
     await useContactsStore.getState().removeContact("c1");
 
     expect(mockDb.softDeleteContact).toHaveBeenCalledWith("c1");
-    expect(mockSupabase.removeContactFromSupabase).toHaveBeenCalledWith("c1");
-    // Contact remains in store but with deletedAt set
+    // removeContactFromSupabase must receive the same timestamp so Supabase updated_at is bumped
+    expect(mockSupabase.removeContactFromSupabase).toHaveBeenCalledWith("c1", fakeNow);
+    // Contact remains in store but with deletedAt + updatedAt set
     const stored = useContactsStore.getState().contacts.find((c) => c.id === "c1");
     expect(stored).toBeDefined();
     expect(stored!.deletedAt).toBeTruthy();
+    expect(stored!.updatedAt).toBe(fakeNow);
   });
 
   it("removeContact does NOT remove the contact from in-memory array", async () => {
