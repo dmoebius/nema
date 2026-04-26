@@ -66,10 +66,7 @@ export function Layout({ title = "nema", showBack = false }: LayoutProps) {
           <AppMenu />
         </Toolbar>
       </AppBar>
-      <Box
-        component="main"
-        sx={{ flexGrow: 1, overflow: "auto", bgcolor: "background.default" }}
-      >
+      <Box component="main" sx={{ flexGrow: 1, overflow: "auto", bgcolor: "background.default" }}>
         <Outlet />
       </Box>
     </Box>

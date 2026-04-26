@@ -1,14 +1,5 @@
 import { useState } from "react";
-import {
-  Box,
-  Button,
-  TextField,
-  Typography,
-  Paper,
-  Snackbar,
-  Alert,
-  Link,
-} from "@mui/material";
+import { Box, Button, TextField, Typography, Paper, Snackbar, Alert, Link } from "@mui/material";
 import { useAuthStore } from "../../store/auth";
 
 type View = "login" | "forgot";
@@ -133,7 +124,10 @@ export function LoginPage() {
                   component="button"
                   type="button"
                   variant="body2"
-                  onClick={() => { setView("forgot"); setError(null); }}
+                  onClick={() => {
+                    setView("forgot");
+                    setError(null);
+                  }}
                 >
                   Passwort vergessen?
                 </Link>
@@ -175,7 +169,10 @@ export function LoginPage() {
                   component="button"
                   type="button"
                   variant="body2"
-                  onClick={() => { setView("login"); setError(null); }}
+                  onClick={() => {
+                    setView("login");
+                    setError(null);
+                  }}
                 >
                   Zurück zum Login
                 </Link>
@@ -191,12 +188,7 @@ export function LoginPage() {
         onClose={() => setSuccessMsg(null)}
         anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
       >
-        <Alert
-          onClose={() => setSuccessMsg(null)}
-          severity="success"
-          variant="filled"
-          sx={{ width: "100%" }}
-        >
+        <Alert onClose={() => setSuccessMsg(null)} severity="success" variant="filled" sx={{ width: "100%" }}>
           {successMsg}
         </Alert>
       </Snackbar>

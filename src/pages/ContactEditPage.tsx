@@ -91,8 +91,7 @@ const sectionHeaderSx = {
 export const ContactEditPage: React.FC = () => {
   const { id } = useParams<{ id?: string }>();
   const navigate = useNavigate();
-  const { getContact, addContact, updateContact, getAllTags, contacts } =
-    useContactsStore();
+  const { getContact, addContact, updateContact, getAllTags, contacts } = useContactsStore();
   const { user } = useAuthStore();
   const isNew = !id || id === "new";
 
@@ -159,8 +158,7 @@ export const ContactEditPage: React.FC = () => {
       e.name = "Vor- oder Nachname ist erforderlich";
     }
     emails.forEach((em, i) => {
-      if (!em.address.trim())
-        e[`email_${i}`] = "E-Mail-Adresse eingeben oder Feld entfernen";
+      if (!em.address.trim()) e[`email_${i}`] = "E-Mail-Adresse eingeben oder Feld entfernen";
     });
     setErrors(e);
     return Object.keys(e).length === 0;
@@ -193,10 +191,7 @@ export const ContactEditPage: React.FC = () => {
 
       // Flush pending tag input not yet confirmed via Enter/Tab/click
       const pendingTag = tagInputValue.trim();
-      const finalTags =
-        pendingTag && !tags.includes(pendingTag)
-          ? [...tags, pendingTag]
-          : tags;
+      const finalTags = pendingTag && !tags.includes(pendingTag) ? [...tags, pendingTag] : tags;
 
       const data: ContactFormData = {
         firstName: firstName.trim(),
@@ -226,29 +221,20 @@ export const ContactEditPage: React.FC = () => {
 
   // Phone handlers (functional updates: rerender-functional-setstate)
   const updatePhone = (idx: number, field: keyof Phone, value: string) =>
-    setPhones((prev) =>
-      prev.map((p, i) => (i === idx ? { ...p, [field]: value } : p)),
-    );
-  const removePhone = (idx: number) =>
-    setPhones((prev) => prev.filter((_, i) => i !== idx));
+    setPhones((prev) => prev.map((p, i) => (i === idx ? { ...p, [field]: value } : p)));
+  const removePhone = (idx: number) => setPhones((prev) => prev.filter((_, i) => i !== idx));
   const addPhone = () => setPhones((prev) => [...prev, emptyPhone()]);
 
   // Email handlers
   const updateEmail = (idx: number, field: keyof Email, value: string) =>
-    setEmails((prev) =>
-      prev.map((e, i) => (i === idx ? { ...e, [field]: value } : e)),
-    );
-  const removeEmail = (idx: number) =>
-    setEmails((prev) => prev.filter((_, i) => i !== idx));
+    setEmails((prev) => prev.map((e, i) => (i === idx ? { ...e, [field]: value } : e)));
+  const removeEmail = (idx: number) => setEmails((prev) => prev.filter((_, i) => i !== idx));
   const addEmail = () => setEmails((prev) => [...prev, emptyEmail()]);
 
   // Address handlers
   const updateAddress = (idx: number, field: keyof Address, value: string) =>
-    setAddresses((prev) =>
-      prev.map((a, i) => (i === idx ? { ...a, [field]: value } : a)),
-    );
-  const removeAddress = (idx: number) =>
-    setAddresses((prev) => prev.filter((_, i) => i !== idx));
+    setAddresses((prev) => prev.map((a, i) => (i === idx ? { ...a, [field]: value } : a)));
+  const removeAddress = (idx: number) => setAddresses((prev) => prev.filter((_, i) => i !== idx));
   const addAddress = () => setAddresses((prev) => [...prev, emptyAddress()]);
 
   const sponsorOptions = contacts.filter((c) => c.id !== id);
@@ -271,9 +257,7 @@ export const ContactEditPage: React.FC = () => {
       <Box sx={{ display: "flex", justifyContent: "center", mb: 3 }}>
         <AvatarPicker
           currentUrl={avatarUrl}
-          initials={
-            (firstName[0] ?? "") + (lastName[0] ?? "") || undefined
-          }
+          initials={(firstName[0] ?? "") + (lastName[0] ?? "") || undefined}
           uploading={uploadingAvatar}
           onFileSelected={(file) => {
             setPendingAvatarFile(file);
@@ -292,12 +276,7 @@ export const ContactEditPage: React.FC = () => {
         <CardContent>
           <Typography sx={sectionHeaderSx}>Name</Typography>
           {errors.name && (
-            <Typography
-              color="error"
-              variant="caption"
-              display="block"
-              sx={{ mb: 1 }}
-            >
+            <Typography color="error" variant="caption" display="block" sx={{ mb: 1 }}>
               {errors.name}
             </Typography>
           )}
@@ -337,12 +316,7 @@ export const ContactEditPage: React.FC = () => {
       {/* Phone */}
       <Card variant="outlined" sx={{ mb: 2 }}>
         <CardContent>
-          <Stack
-            direction="row"
-            justifyContent="space-between"
-            alignItems="center"
-            sx={{ mb: 1.5 }}
-          >
+          <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 1.5 }}>
             <Typography sx={sectionHeaderSx}>Telefon</Typography>
             <IconButton size="small" onClick={addPhone} color="primary" aria-label="Telefonnummer hinzufügen">
               <AddIcon />
@@ -360,11 +334,7 @@ export const ContactEditPage: React.FC = () => {
                 <Stack direction="row" gap={1} alignItems="flex-start">
                   <FormControl size="small" sx={{ minWidth: 100 }}>
                     <InputLabel>Typ</InputLabel>
-                    <Select
-                      label="Typ"
-                      value={phone.type}
-                      onChange={(e) => updatePhone(idx, "type", e.target.value)}
-                    >
+                    <Select label="Typ" value={phone.type} onChange={(e) => updatePhone(idx, "type", e.target.value)}>
                       {phoneTypes.map((t) => (
                         <MenuItem key={t.value} value={t.value}>
                           {t.label}
@@ -380,12 +350,7 @@ export const ContactEditPage: React.FC = () => {
                     size="small"
                     type="tel"
                   />
-                  <IconButton
-                    size="small"
-                    onClick={() => removePhone(idx)}
-                    color="error"
-                    sx={{ mt: 0.5 }}
-                  >
+                  <IconButton size="small" onClick={() => removePhone(idx)} color="error" sx={{ mt: 0.5 }}>
                     <DeleteOutlineIcon />
                   </IconButton>
                 </Stack>
@@ -398,12 +363,7 @@ export const ContactEditPage: React.FC = () => {
       {/* E-Mail */}
       <Card variant="outlined" sx={{ mb: 2 }}>
         <CardContent>
-          <Stack
-            direction="row"
-            justifyContent="space-between"
-            alignItems="center"
-            sx={{ mb: 1.5 }}
-          >
+          <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 1.5 }}>
             <Typography sx={sectionHeaderSx}>E-Mail</Typography>
             <IconButton size="small" onClick={addEmail} color="primary" aria-label="E-Mail hinzufügen">
               <AddIcon />
@@ -421,11 +381,7 @@ export const ContactEditPage: React.FC = () => {
                 <Stack direction="row" gap={1} alignItems="flex-start">
                   <FormControl size="small" sx={{ minWidth: 100 }}>
                     <InputLabel>Typ</InputLabel>
-                    <Select
-                      label="Typ"
-                      value={email.type}
-                      onChange={(e) => updateEmail(idx, "type", e.target.value)}
-                    >
+                    <Select label="Typ" value={email.type} onChange={(e) => updateEmail(idx, "type", e.target.value)}>
                       {emailTypes.map((t) => (
                         <MenuItem key={t.value} value={t.value}>
                           {t.label}
@@ -436,21 +392,14 @@ export const ContactEditPage: React.FC = () => {
                   <TextField
                     label="E-Mail"
                     value={email.address}
-                    onChange={(e) =>
-                      updateEmail(idx, "address", e.target.value)
-                    }
+                    onChange={(e) => updateEmail(idx, "address", e.target.value)}
                     fullWidth
                     size="small"
                     type="email"
                     error={!!errors[`email_${idx}`]}
                     helperText={errors[`email_${idx}`]}
                   />
-                  <IconButton
-                    size="small"
-                    onClick={() => removeEmail(idx)}
-                    color="error"
-                    sx={{ mt: 0.5 }}
-                  >
+                  <IconButton size="small" onClick={() => removeEmail(idx)} color="error" sx={{ mt: 0.5 }}>
                     <DeleteOutlineIcon />
                   </IconButton>
                 </Stack>
@@ -463,12 +412,7 @@ export const ContactEditPage: React.FC = () => {
       {/* Address */}
       <Card variant="outlined" sx={{ mb: 2 }}>
         <CardContent>
-          <Stack
-            direction="row"
-            justifyContent="space-between"
-            alignItems="center"
-            sx={{ mb: 1.5 }}
-          >
+          <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 1.5 }}>
             <Typography sx={sectionHeaderSx}>Adresse</Typography>
             <IconButton size="small" onClick={addAddress} color="primary" aria-label="Adresse hinzufügen">
               <AddIcon />
@@ -483,21 +427,10 @@ export const ContactEditPage: React.FC = () => {
             {addresses.map((addr, idx) => (
               <Box key={addr.id}>
                 {idx > 0 && <Divider sx={{ mb: 1.5 }} />}
-                <Stack
-                  direction="row"
-                  justifyContent="space-between"
-                  alignItems="center"
-                  sx={{ mb: 1 }}
-                >
+                <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 1 }}>
                   <FormControl size="small" sx={{ minWidth: 100 }}>
                     <InputLabel>Typ</InputLabel>
-                    <Select
-                      label="Typ"
-                      value={addr.type}
-                      onChange={(e) =>
-                        updateAddress(idx, "type", e.target.value)
-                      }
-                    >
+                    <Select label="Typ" value={addr.type} onChange={(e) => updateAddress(idx, "type", e.target.value)}>
                       {addressTypes.map((t) => (
                         <MenuItem key={t.value} value={t.value}>
                           {t.label}
@@ -505,11 +438,7 @@ export const ContactEditPage: React.FC = () => {
                       ))}
                     </Select>
                   </FormControl>
-                  <IconButton
-                    size="small"
-                    onClick={() => removeAddress(idx)}
-                    color="error"
-                  >
+                  <IconButton size="small" onClick={() => removeAddress(idx)} color="error">
                     <DeleteOutlineIcon />
                   </IconButton>
                 </Stack>
@@ -517,9 +446,7 @@ export const ContactEditPage: React.FC = () => {
                   <TextField
                     label="Straße"
                     value={addr.street}
-                    onChange={(e) =>
-                      updateAddress(idx, "street", e.target.value)
-                    }
+                    onChange={(e) => updateAddress(idx, "street", e.target.value)}
                     fullWidth
                     size="small"
                   />
@@ -527,18 +454,14 @@ export const ContactEditPage: React.FC = () => {
                     <TextField
                       label="PLZ"
                       value={addr.zip}
-                      onChange={(e) =>
-                        updateAddress(idx, "zip", e.target.value)
-                      }
+                      onChange={(e) => updateAddress(idx, "zip", e.target.value)}
                       size="small"
                       sx={{ width: 100 }}
                     />
                     <TextField
                       label="Ort"
                       value={addr.city}
-                      onChange={(e) =>
-                        updateAddress(idx, "city", e.target.value)
-                      }
+                      onChange={(e) => updateAddress(idx, "city", e.target.value)}
                       fullWidth
                       size="small"
                     />
@@ -546,9 +469,7 @@ export const ContactEditPage: React.FC = () => {
                   <TextField
                     label="Land"
                     value={addr.country}
-                    onChange={(e) =>
-                      updateAddress(idx, "country", e.target.value)
-                    }
+                    onChange={(e) => updateAddress(idx, "country", e.target.value)}
                     fullWidth
                     size="small"
                   />
@@ -592,13 +513,7 @@ export const ContactEditPage: React.FC = () => {
             }}
             renderValue={(value, getTagProps) =>
               value.map((option, index) => (
-                <Chip
-                  label={option}
-                  size="small"
-                  {...getTagProps({ index })}
-                  key={option}
-                  sx={{ fontWeight: 500 }}
-                />
+                <Chip label={option} size="small" {...getTagProps({ index })} key={option} sx={{ fontWeight: 500 }} />
               ))
             }
             renderInput={(params) => (
@@ -629,21 +544,12 @@ export const ContactEditPage: React.FC = () => {
           <Typography sx={sectionHeaderSx}>Gesponsert von (Upline)</Typography>
           <Autocomplete
             options={sponsorOptions}
-            getOptionLabel={(c) =>
-              [c.firstName, c.lastName].filter(Boolean).join(" ")
-            }
+            getOptionLabel={(c) => [c.firstName, c.lastName].filter(Boolean).join(" ")}
             value={sponsorOptions.find((c) => c.id === sponsorId) ?? null}
-            onChange={(_, newValue) =>
-              setSponsorId((newValue as Contact | null)?.id ?? "")
-            }
+            onChange={(_, newValue) => setSponsorId((newValue as Contact | null)?.id ?? "")}
             isOptionEqualToValue={(option, value) => option.id === value.id}
             renderInput={(params) => (
-              <TextField
-                {...params}
-                size="small"
-                label="Sponsor / Upline auswählen"
-                placeholder="Suche…"
-              />
+              <TextField {...params} size="small" label="Sponsor / Upline auswählen" placeholder="Suche…" />
             )}
           />
         </CardContent>
@@ -667,12 +573,7 @@ export const ContactEditPage: React.FC = () => {
 
       {/* Actions */}
       <Stack direction="row" gap={2}>
-        <Button
-          variant="outlined"
-          fullWidth
-          onClick={() => navigate(-1)}
-          disabled={saving}
-        >
+        <Button variant="outlined" fullWidth onClick={() => navigate(-1)} disabled={saving}>
           Abbrechen
         </Button>
         <Button
@@ -680,9 +581,7 @@ export const ContactEditPage: React.FC = () => {
           fullWidth
           onClick={handleSave}
           disabled={saving}
-          startIcon={
-            saving ? <CircularProgress size={16} color="inherit" /> : undefined
-          }
+          startIcon={saving ? <CircularProgress size={16} color="inherit" /> : undefined}
         >
           {saving ? "Speichern…" : "Speichern"}
         </Button>

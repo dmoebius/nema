@@ -3,14 +3,7 @@ import { supabase } from "../lib/supabase";
 import type { Contact } from "../types/contact";
 import { mergeContacts, toTimestamped } from "./merge";
 import type { TimestampedContact } from "./merge";
-import {
-  getActiveContacts,
-  saveContact,
-  deleteContact,
-  getSyncBase,
-  setSyncBase,
-  deleteSyncBase,
-} from "../db";
+import { getActiveContacts, saveContact, deleteContact, getSyncBase, setSyncBase, deleteSyncBase } from "../db";
 
 // Maps Supabase row (snake_case) to local Contact (camelCase)
 function rowToContact(row: Record<string, unknown>): TimestampedContact {
@@ -60,11 +53,7 @@ function contactToRow(contact: TimestampedContact, userId: string): Record<strin
 
 // Fetch all active (non-deleted) contacts for the current user from Supabase
 export async function pullContacts(): Promise<TimestampedContact[]> {
-  const { data, error } = await supabase
-    .from("contacts")
-    .select("*")
-    .is("deleted_at", null)
-    .order("last_name");
+  const { data, error } = await supabase.from("contacts").select("*").is("deleted_at", null).order("last_name");
 
   if (error) throw new Error(error.message);
   return (data ?? []).map((row) => rowToContact(row as Record<string, unknown>));
@@ -72,19 +61,14 @@ export async function pullContacts(): Promise<TimestampedContact[]> {
 
 // Push a single contact to Supabase (upsert)
 export async function pushContact(contact: TimestampedContact, userId: string): Promise<void> {
-  const { error } = await supabase
-    .from("contacts")
-    .upsert(contactToRow(contact, userId));
+  const { error } = await supabase.from("contacts").upsert(contactToRow(contact, userId));
 
   if (error) throw new Error(error.message);
 }
 
 // Soft-delete a contact in Supabase (sets deleted_at instead of hard delete)
 export async function removeContactFromSupabase(id: string): Promise<void> {
-  const { error } = await supabase
-    .from("contacts")
-    .update({ deleted_at: new Date().toISOString() })
-    .eq("id", id);
+  const { error } = await supabase.from("contacts").update({ deleted_at: new Date().toISOString() }).eq("id", id);
   if (error) throw new Error(error.message);
 }
 
@@ -96,10 +80,7 @@ export async function hardDeleteContactFromSupabase(id: string): Promise<void> {
 
 // Full sync: pull remote (active only), merge with local active contacts, push conflicts resolved
 export async function syncAll(userId: string): Promise<void> {
-  const [remoteContacts, localContacts] = await Promise.all([
-    pullContacts(),
-    getActiveContacts(),
-  ]);
+  const [remoteContacts, localContacts] = await Promise.all([pullContacts(), getActiveContacts()]);
 
   const localMap = new Map(localContacts.map((c) => [c.id, c]));
   const remoteMap = new Map(remoteContacts.map((c) => [c.id, c]));

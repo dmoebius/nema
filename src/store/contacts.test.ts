@@ -177,13 +177,8 @@ describe("useContactsStore — soft-delete, restore, permanentlyDelete", () => {
 
     await useContactsStore.getState().restoreContact("c1");
 
-    expect(mockDb.saveContact).toHaveBeenCalledWith(
-      expect.objectContaining({ id: "c1", deletedAt: undefined }),
-    );
-    expect(mockSupabase.pushContact).toHaveBeenCalledWith(
-      expect.objectContaining({ id: "c1" }),
-      "user-1",
-    );
+    expect(mockDb.saveContact).toHaveBeenCalledWith(expect.objectContaining({ id: "c1", deletedAt: undefined }));
+    expect(mockSupabase.pushContact).toHaveBeenCalledWith(expect.objectContaining({ id: "c1" }), "user-1");
     const stored = useContactsStore.getState().contacts.find((c) => c.id === "c1");
     expect(stored!.deletedAt).toBeUndefined();
   });

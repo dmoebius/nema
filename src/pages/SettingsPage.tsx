@@ -1,14 +1,6 @@
 import { useState } from "react";
 import { Capacitor } from "@capacitor/core";
-import {
-  Box,
-  Typography,
-  Button,
-  Paper,
-  Divider,
-  Alert,
-  CircularProgress,
-} from "@mui/material";
+import { Box, Typography, Button, Paper, Divider, Alert, CircularProgress } from "@mui/material";
 import SyncIcon from "@mui/icons-material/Sync";
 import PhoneAndroidIcon from "@mui/icons-material/PhoneAndroid";
 import { useSyncStore } from "../store/sync";
@@ -57,7 +49,11 @@ export function SettingsPage() {
     <Box sx={{ p: 2, maxWidth: 480, mx: "auto" }}>
       <Paper elevation={0} sx={{ border: "1px solid", borderColor: "divider", borderRadius: 2 }}>
         <Box sx={{ px: 2.5, py: 2 }}>
-          <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 1.5, fontWeight: 600, letterSpacing: "0.05em", textTransform: "uppercase", fontSize: "0.7rem" }}>
+          <Typography
+            variant="subtitle2"
+            color="text.secondary"
+            sx={{ mb: 1.5, fontWeight: 600, letterSpacing: "0.05em", textTransform: "uppercase", fontSize: "0.7rem" }}
+          >
             Synchronisierung
           </Typography>
 
@@ -87,13 +83,7 @@ export function SettingsPage() {
 
               <Button
                 variant="contained"
-                startIcon={
-                  syncing ? (
-                    <CircularProgress size={16} color="inherit" />
-                  ) : (
-                    <SyncIcon />
-                  )
-                }
+                startIcon={syncing ? <CircularProgress size={16} color="inherit" /> : <SyncIcon />}
                 onClick={handleDeviceSync}
                 disabled={syncing}
                 disableElevation

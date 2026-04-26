@@ -1,13 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import {
-  Box,
-  Button,
-  TextField,
-  Typography,
-  Paper,
-  Alert,
-} from "@mui/material";
+import { Box, Button, TextField, Typography, Paper, Alert } from "@mui/material";
 import { supabase } from "../../lib/supabase";
 
 export function ResetPasswordPage() {

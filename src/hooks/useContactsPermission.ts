@@ -10,7 +10,7 @@ export type PermissionStatus = "granted" | "denied" | "prompt" | "unavailable";
  */
 export function useContactsPermission(enabled = true): PermissionStatus {
   const [status, setStatus] = useState<PermissionStatus>(() =>
-    Capacitor.isNativePlatform() ? "prompt" : "unavailable"
+    Capacitor.isNativePlatform() ? "prompt" : "unavailable",
   );
 
   useEffect(() => {
@@ -19,8 +19,7 @@ export function useContactsPermission(enabled = true): PermissionStatus {
     const requestPermission = async () => {
       try {
         const result = await Contacts.requestPermissions();
-        const granted =
-          result.contacts === "granted";
+        const granted = result.contacts === "granted";
         setStatus(granted ? "granted" : "denied");
       } catch {
         setStatus("denied");

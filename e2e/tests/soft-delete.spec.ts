@@ -38,9 +38,7 @@ async function createContact(
   await expect(page).toHaveURL(/\/contacts\/[^/]+$/);
 }
 
-async function softDeleteCurrentContact(
-  page: import("@playwright/test").Page,
-): Promise<void> {
+async function softDeleteCurrentContact(page: import("@playwright/test").Page): Promise<void> {
   const detailPage = new ContactDetailPage(page);
   await detailPage.deleteContact();
   // After soft-delete: redirected back to list

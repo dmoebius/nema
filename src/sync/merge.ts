@@ -25,10 +25,7 @@ export function mergeContacts(
   const mergedTimestamps: Partial<Record<keyof Contact, string>> = {};
   const result = { ...base } as TimestampedContact;
 
-  const fields = new Set([
-    ...Object.keys(local),
-    ...Object.keys(remote),
-  ]) as Set<keyof Contact>;
+  const fields = new Set([...Object.keys(local), ...Object.keys(remote)]) as Set<keyof Contact>;
 
   // Reserved fields that are never merged per-attribute
   const skipFields = new Set<keyof Contact>(["id", "createdAt"]);

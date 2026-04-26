@@ -26,8 +26,7 @@ const AVATAR_COLORS = [
 
 export function getAvatarColor(name: string): string {
   let hash = 0;
-  for (let i = 0; i < name.length; i++)
-    hash = name.charCodeAt(i) + ((hash << 5) - hash);
+  for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash);
   return AVATAR_COLORS[Math.abs(hash) % AVATAR_COLORS.length];
 }
 
@@ -67,33 +66,17 @@ export function ContactRow({ contact, onClick }: ContactRowProps) {
         secondary={
           <Box component="span">
             {contact.company && (
-              <Typography
-                variant="body2"
-                color="text.secondary"
-                component="span"
-                display="block"
-              >
+              <Typography variant="body2" color="text.secondary" component="span" display="block">
                 {contact.company}
               </Typography>
             )}
             {contact.phones[0] && (
-              <Typography
-                variant="body2"
-                color="text.secondary"
-                component="span"
-                display="block"
-              >
+              <Typography variant="body2" color="text.secondary" component="span" display="block">
                 {contact.phones[0].number}
               </Typography>
             )}
             {contact.tags.length > 0 && (
-              <Stack
-                direction="row"
-                gap={0.5}
-                flexWrap="wrap"
-                sx={{ mt: 0.5 }}
-                component="span"
-              >
+              <Stack direction="row" gap={0.5} flexWrap="wrap" sx={{ mt: 0.5 }} component="span">
                 {contact.tags.map((tag) => (
                   <Chip
                     key={tag}

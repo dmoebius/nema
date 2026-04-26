@@ -56,9 +56,7 @@ function toCapEmailType(type: Email["type"]): CapEmailType {
  * @param nemaContacts - Current active (non-deleted) nema contacts
  * @returns Updated contacts array (with new deviceContactId assignments and/or new imports)
  */
-export async function syncWithDeviceContacts(
-  nemaContacts: Contact[],
-): Promise<Contact[]> {
+export async function syncWithDeviceContacts(nemaContacts: Contact[]): Promise<Contact[]> {
   if (!Capacitor.isNativePlatform()) return nemaContacts;
 
   // Read all device contacts
@@ -86,9 +84,7 @@ export async function syncWithDeviceContacts(
   }
 
   // Track which nema contacts were updated
-  const updatedContacts = new Map<string, Contact>(
-    nemaContacts.map((c) => [c.id, { ...c }]),
-  );
+  const updatedContacts = new Map<string, Contact>(nemaContacts.map((c) => [c.id, { ...c }]));
 
   // Contacts to add as new nema entries (duplicate name matches)
   const toAdd: Contact[] = [];
@@ -180,10 +176,7 @@ export async function syncWithDeviceContacts(
  * the existing entry and recreate it. Only nema-managed fields are written:
  * firstName, lastName, phones, emails, company.
  */
-async function writeNemaContactToDevice(
-  contact: Contact,
-  deviceContactId: string,
-): Promise<void> {
+async function writeNemaContactToDevice(contact: Contact, deviceContactId: string): Promise<void> {
   // Delete the old device contact entry first
   await Contacts.deleteContact({ contactId: deviceContactId });
 
@@ -204,9 +197,7 @@ async function writeNemaContactToDevice(
         address: e.address,
         isPrimary: false,
       })),
-      organization: contact.company
-        ? { company: contact.company, jobTitle: null, department: null }
-        : undefined,
+      organization: contact.company ? { company: contact.company, jobTitle: null, department: null } : undefined,
     },
   });
 }

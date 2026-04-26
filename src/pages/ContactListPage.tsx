@@ -1,12 +1,6 @@
 import React, { useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import {
-  Box,
-  List,
-  Fab,
-  Typography,
-  CircularProgress,
-} from "@mui/material";
+import { Box, List, Fab, Typography, CircularProgress } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import PersonIcon from "@mui/icons-material/Person";
 import { useContactsStore } from "../store/contacts";
@@ -52,9 +46,7 @@ export function ContactListPage() {
       if (!grouped[letter]) grouped[letter] = [];
       grouped[letter].push(c);
     }
-    const letters = Object.keys(grouped).sort((a, b) =>
-      a.localeCompare(b, "de"),
-    );
+    const letters = Object.keys(grouped).sort((a, b) => a.localeCompare(b, "de"));
     return { grouped, letters };
   }, [contacts]);
 
@@ -85,9 +77,7 @@ export function ContactListPage() {
           </Box>
         ) : contacts.length === 0 ? (
           <Box sx={{ textAlign: "center", mt: 8, px: 4 }}>
-            <PersonIcon
-              sx={{ fontSize: 64, color: "primary.light", opacity: 0.4, mb: 2 }}
-            />
+            <PersonIcon sx={{ fontSize: 64, color: "primary.light", opacity: 0.4, mb: 2 }} />
             <Typography
               variant="h6"
               color="text.secondary"

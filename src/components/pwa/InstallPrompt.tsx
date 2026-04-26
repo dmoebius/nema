@@ -1,11 +1,5 @@
 import React, { useEffect, useState } from "react";
-import {
-  Snackbar,
-  Button,
-  Box,
-  Typography,
-  IconButton,
-} from "@mui/material";
+import { Snackbar, Button, Box, Typography, IconButton } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import GetAppIcon from "@mui/icons-material/GetApp";
 
@@ -24,8 +18,7 @@ function isIosSafari(): boolean {
 function isInstalled(): boolean {
   return (
     window.matchMedia("(display-mode: standalone)").matches ||
-    ("standalone" in window.navigator &&
-      (window.navigator as { standalone?: boolean }).standalone === true)
+    ("standalone" in window.navigator && (window.navigator as { standalone?: boolean }).standalone === true)
   );
 }
 
@@ -87,11 +80,7 @@ export const InstallPrompt: React.FC = () => {
   if (!open) return null;
 
   return (
-    <Snackbar
-      open={open}
-      anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
-      sx={{ mb: 8 }}
-    >
+    <Snackbar open={open} anchorOrigin={{ vertical: "bottom", horizontal: "center" }} sx={{ mb: 8 }}>
       <Box
         sx={{
           bgcolor: "background.paper",
@@ -124,12 +113,7 @@ export const InstallPrompt: React.FC = () => {
               <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
                 Füge nema zum Home-Bildschirm hinzu für schnellen Zugriff.
               </Typography>
-              <Button
-                size="small"
-                variant="contained"
-                onClick={handleInstall}
-                sx={{ borderRadius: 1.5 }}
-              >
+              <Button size="small" variant="contained" onClick={handleInstall} sx={{ borderRadius: 1.5 }}>
                 Installieren
               </Button>
             </>

@@ -12,11 +12,7 @@ import {
 } from "../db";
 import { useAuthStore } from "./auth";
 import { useSyncStore } from "./sync";
-import {
-  removeContactFromSupabase,
-  hardDeleteContactFromSupabase,
-  pushContact,
-} from "../sync/supabaseSync";
+import { removeContactFromSupabase, hardDeleteContactFromSupabase, pushContact } from "../sync/supabaseSync";
 import { Contacts } from "@capacitor-community/contacts";
 import { syncWithDeviceContacts } from "../sync/deviceSync";
 import { toTimestamped } from "../sync/merge";
@@ -110,9 +106,7 @@ export const useContactsStore = create<ContactsState>((set, get) => ({
     if (userId) await removeContactFromSupabase(id);
     // Update in-memory: mark as deleted
     set((state) => ({
-      contacts: state.contacts.map((c) =>
-        c.id === id ? { ...c, deletedAt: new Date().toISOString() } : c,
-      ),
+      contacts: state.contacts.map((c) => (c.id === id ? { ...c, deletedAt: new Date().toISOString() } : c)),
     }));
     // Device sync: soft-deleted contacts are skipped automatically
     if (Capacitor.isNativePlatform()) await runDeviceSync();
@@ -224,9 +218,7 @@ export const useContactsStore = create<ContactsState>((set, get) => ({
     const { contacts } = get();
     const tagSet = new Set<string>();
     // Only include tags from active (non-deleted) contacts
-    contacts
-      .filter((c) => !c.deletedAt)
-      .forEach((c) => c.tags.forEach((t) => tagSet.add(t)));
+    contacts.filter((c) => !c.deletedAt).forEach((c) => c.tags.forEach((t) => tagSet.add(t)));
     return Array.from(tagSet).sort((a, b) => a.localeCompare(b, "de"));
   },
 }));

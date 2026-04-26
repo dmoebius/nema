@@ -19,7 +19,9 @@ export const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
 
   // Redirect to reset-password page when user clicks a password reset link
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((event) => {
       if (event === "PASSWORD_RECOVERY") {
         navigate("/reset-password", { replace: true });
       }

@@ -56,8 +56,7 @@ const AVATAR_COLORS = [
 
 function getAvatarColor(name: string): string {
   let hash = 0;
-  for (let i = 0; i < name.length; i++)
-    hash = name.charCodeAt(i) + ((hash << 5) - hash);
+  for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash);
   return AVATAR_COLORS[Math.abs(hash) % AVATAR_COLORS.length];
 }
 
@@ -89,11 +88,7 @@ interface DownlineSectionProps {
   onNavigate: (id: string) => void;
 }
 
-const DownlineSection: React.FC<DownlineSectionProps> = ({
-  contactId,
-  contacts,
-  onNavigate,
-}) => {
+const DownlineSection: React.FC<DownlineSectionProps> = ({ contactId, contacts, onNavigate }) => {
   const downline = contacts.filter((c) => c.sponsorId === contactId);
   if (downline.length === 0) return null;
 
@@ -167,12 +162,8 @@ export const ContactDetailPage: React.FC = () => {
     );
   }
 
-  const sponsor = contact.sponsorId
-    ? contacts.find((c) => c.id === contact.sponsorId)
-    : undefined;
-  const fullName = [contact.firstName, contact.lastName]
-    .filter(Boolean)
-    .join(" ");
+  const sponsor = contact.sponsorId ? contacts.find((c) => c.id === contact.sponsorId) : undefined;
+  const fullName = [contact.firstName, contact.lastName].filter(Boolean).join(" ");
   const initials = getInitials(contact.firstName, contact.lastName);
   const color = getAvatarColor(fullName);
 
@@ -246,22 +237,13 @@ export const ContactDetailPage: React.FC = () => {
             {contact.firstName} {contact.lastName}
           </Typography>
           {contact.company && (
-            <Typography
-              variant="body2"
-              sx={{ color: "#2d5a40", mt: 0.25, fontWeight: 500 }}
-            >
+            <Typography variant="body2" sx={{ color: "#2d5a40", mt: 0.25, fontWeight: 500 }}>
               {contact.company}
             </Typography>
           )}
         </Box>
         {contact.tags.length > 0 && (
-          <Stack
-            direction="row"
-            flexWrap="wrap"
-            justifyContent="center"
-            gap={0.5}
-            sx={{ zIndex: 1 }}
-          >
+          <Stack direction="row" flexWrap="wrap" justifyContent="center" gap={0.5} sx={{ zIndex: 1 }}>
             {contact.tags.map((tag) => (
               <Chip
                 key={tag}
@@ -330,11 +312,7 @@ export const ContactDetailPage: React.FC = () => {
                       alignItems: "center",
                     }}
                   >
-                    <Link
-                      href={`tel:${p.number}`}
-                      underline="hover"
-                      color="inherit"
-                    >
+                    <Link href={`tel:${p.number}`} underline="hover" color="inherit">
                       <Typography variant="body1" fontWeight={500}>
                         {p.number}
                       </Typography>
@@ -368,11 +346,7 @@ export const ContactDetailPage: React.FC = () => {
                       alignItems: "center",
                     }}
                   >
-                    <Link
-                      href={`mailto:${e.address}`}
-                      underline="hover"
-                      color="inherit"
-                    >
+                    <Link href={`mailto:${e.address}`} underline="hover" color="inherit">
                       <Typography variant="body1" fontWeight={500}>
                         {e.address}
                       </Typography>
@@ -407,17 +381,11 @@ export const ContactDetailPage: React.FC = () => {
                     }}
                   >
                     <Box>
-                      {a.street && (
-                        <Typography variant="body2">{a.street}</Typography>
-                      )}
+                      {a.street && <Typography variant="body2">{a.street}</Typography>}
                       {(a.zip || a.city) && (
-                        <Typography variant="body2">
-                          {[a.zip, a.city].filter(Boolean).join(" ")}
-                        </Typography>
+                        <Typography variant="body2">{[a.zip, a.city].filter(Boolean).join(" ")}</Typography>
                       )}
-                      {a.country && (
-                        <Typography variant="body2">{a.country}</Typography>
-                      )}
+                      {a.country && <Typography variant="body2">{a.country}</Typography>}
                     </Box>
                     <Typography variant="caption" color="text.secondary">
                       {addressTypeLabel[a.type] ?? a.type}
@@ -484,9 +452,7 @@ export const ContactDetailPage: React.FC = () => {
                   sx={{
                     width: 30,
                     height: 30,
-                    bgcolor: getAvatarColor(
-                      [sponsor.firstName, sponsor.lastName].join(" "),
-                    ),
+                    bgcolor: getAvatarColor([sponsor.firstName, sponsor.lastName].join(" ")),
                     fontSize: "0.75rem",
                     fontWeight: 700,
                   }}
@@ -502,11 +468,7 @@ export const ContactDetailPage: React.FC = () => {
         )}
 
         {/* Downline as separate component (rerender-no-inline-components) */}
-        <DownlineSection
-          contactId={contact.id}
-          contacts={contacts}
-          onNavigate={(id) => navigate(`/contacts/${id}`)}
-        />
+        <DownlineSection contactId={contact.id} contacts={contacts} onNavigate={(id) => navigate(`/contacts/${id}`)} />
 
         {contact.note && (
           <Card variant="outlined" sx={{ mb: 2 }}>
@@ -517,10 +479,7 @@ export const ContactDetailPage: React.FC = () => {
                   Notiz
                 </Typography>
               </Stack>
-              <Typography
-                variant="body2"
-                sx={{ whiteSpace: "pre-wrap", lineHeight: 1.7 }}
-              >
+              <Typography variant="body2" sx={{ whiteSpace: "pre-wrap", lineHeight: 1.7 }}>
                 {contact.note}
               </Typography>
             </CardContent>
@@ -536,18 +495,13 @@ export const ContactDetailPage: React.FC = () => {
           data-testid="contact-updated-at"
           data-value={contact.updatedAt}
         >
-          Zuletzt geändert:{" "}
-          {new Date(contact.updatedAt).toLocaleString("de-DE")}
+          Zuletzt geändert: {new Date(contact.updatedAt).toLocaleString("de-DE")}
         </Typography>
       </Box>
 
       {/* Delete confirmation dialog */}
       <Dialog open={deleteOpen} onClose={() => setDeleteOpen(false)}>
-        <DialogTitle
-          sx={{ fontFamily: '"DM Serif Display", serif', fontWeight: 400 }}
-        >
-          Kontakt ausblenden?
-        </DialogTitle>
+        <DialogTitle sx={{ fontFamily: '"DM Serif Display", serif', fontWeight: 400 }}>Kontakt ausblenden?</DialogTitle>
         <DialogContent>
           <DialogContentText>
             Kontakt {fullName} ausblenden? Er kann unter „Ausgeblendete“ wiederhergestellt werden.
