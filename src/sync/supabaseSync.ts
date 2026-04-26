@@ -3,7 +3,7 @@ import { supabase } from "../lib/supabase";
 import type { Contact } from "../types/contact";
 import { mergeContacts, toTimestamped } from "./merge";
 import type { TimestampedContact } from "./merge";
-import { getActiveContacts, getContact, saveContact, deleteContact, getSyncBase, setSyncBase, deleteSyncBase } from "../db";
+import { getAllContacts, getContact, saveContact, deleteContact, getSyncBase, setSyncBase, deleteSyncBase } from "../db";
 
 // Maps Supabase row (snake_case) to local Contact (camelCase)
 function rowToContact(row: Record<string, unknown>): TimestampedContact {
@@ -88,9 +88,15 @@ export async function hardDeleteContactFromSupabase(id: string): Promise<void> {
 
 // Full sync: pull remote (active only), merge with local active contacts, push conflicts resolved
 export async function syncAll(userId: string): Promise<void> {
-  const [remoteContacts, localContacts] = await Promise.all([pullContacts(), getActiveContacts()]);
+  // Use getAllContacts (active + soft-deleted) so that a locally soft-deleted contact
+  // is never overwritten by the still-active remote version when the Supabase UPDATE
+  // from removeContactFromSupabase is still in-flight (fire-and-forget race).
+  const [remoteContacts, allLocalContacts] = await Promise.all([pullContacts(), getAllContacts()]);
 
-  const localMap = new Map(localContacts.map((c) => [c.id, c]));
+  // Active-only map for merge logic; full map for soft-delete guard
+  const localActiveContacts = allLocalContacts.filter((c) => !c.deletedAt);
+  const localMap = new Map(localActiveContacts.map((c) => [c.id, c]));
+  const allLocalMap = new Map(allLocalContacts.map((c) => [c.id, c]));
   const remoteMap = new Map(remoteContacts.map((c) => [c.id, c]));
   const allIds = new Set([...localMap.keys(), ...remoteMap.keys()]);
 
@@ -99,7 +105,17 @@ export async function syncAll(userId: string): Promise<void> {
     const remote = remoteMap.get(id);
 
     if (remote && !local) {
-      // Only on remote → save locally
+      // Contact is active on remote but not in local active map.
+      // Check if it exists locally as soft-deleted: if so, and the local updatedAt is
+      // >= remote updatedAt, the local soft-delete is at least as new as the remote
+      // active version — respect it and skip the overwrite.
+      // This fixes the race where removeContactFromSupabase (fire-and-forget) hasn't
+      // reached Supabase yet when syncAll runs.
+      const localAll = allLocalMap.get(id);
+      if (localAll?.deletedAt && localAll.updatedAt >= remote.updatedAt) {
+        continue;
+      }
+      // Genuinely only on remote (or remote is newer than local soft-delete) → save locally
       await saveContact(remote);
       await setSyncBase(remote);
       continue;

@@ -70,7 +70,7 @@ describe("syncAll", () => {
     };
 
     vi.mocked(supabase.from).mockReturnValue(makeSupabaseChain([remoteRow]) as never);
-    vi.mocked(db.getActiveContacts).mockResolvedValue([]);
+    vi.mocked(db.getAllContacts).mockResolvedValue([]);
     vi.mocked(db.getSyncBase).mockResolvedValue(undefined);
 
     await syncAll(userId);
@@ -83,7 +83,7 @@ describe("syncAll", () => {
     const local = makeContact({ id: "local-1" });
 
     vi.mocked(supabase.from).mockReturnValue(makeSupabaseChain([]) as never);
-    vi.mocked(db.getActiveContacts).mockResolvedValue([local]);
+    vi.mocked(db.getAllContacts).mockResolvedValue([local]);
     vi.mocked(db.getSyncBase).mockResolvedValue(undefined);
 
     await syncAll(userId);
@@ -107,12 +107,45 @@ describe("syncAll", () => {
     };
 
     vi.mocked(supabase.from).mockReturnValue(makeSupabaseChain([remoteRow]) as never);
-    vi.mocked(db.getActiveContacts).mockResolvedValue([contact]);
+    vi.mocked(db.getAllContacts).mockResolvedValue([contact]);
     vi.mocked(db.getSyncBase).mockResolvedValue(toTimestamped(contact));
 
     await syncAll(userId);
 
     // saveContact should not be called for unchanged contacts
+    expect(db.saveContact).not.toHaveBeenCalled();
+  });
+
+  it("does not overwrite locally soft-deleted contact with remote active version", async () => {
+    // Simulates the race where removeContactFromSupabase (fire-and-forget) hasn't
+    // reached Supabase yet, so the contact still appears active on remote.
+    const deletedAt = "2024-01-02T00:00:01Z";
+    const localSoftDeleted = makeContact({
+      id: "contact-1",
+      updatedAt: deletedAt,
+      deletedAt,
+    });
+    const remoteRow = {
+      id: "contact-1",
+      first_name: "Max",
+      last_name: "Mustermann",
+      phones: [],
+      emails: [],
+      addresses: [],
+      tags: [],
+      field_timestamps: {},
+      deleted_at: null,
+      created_at: "2024-01-01T00:00:00Z",
+      updated_at: "2024-01-01T00:00:00Z", // older than local soft-delete
+    };
+
+    vi.mocked(supabase.from).mockReturnValue(makeSupabaseChain([remoteRow]) as never);
+    vi.mocked(db.getAllContacts).mockResolvedValue([localSoftDeleted]);
+    vi.mocked(db.getSyncBase).mockResolvedValue(undefined);
+
+    await syncAll(userId);
+
+    // Must NOT overwrite IDB with the remote active version
     expect(db.saveContact).not.toHaveBeenCalled();
   });
 });
