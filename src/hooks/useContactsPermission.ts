@@ -27,7 +27,7 @@ export function useContactsPermission(enabled = true): PermissionStatus {
     };
 
     requestPermission();
-  }, []);
+  }, [enabled]);
 
   return status;
 }

@@ -2,7 +2,7 @@ import { Box, Avatar, Typography, IconButton, Tooltip } from "@mui/material";
 import RestoreFromTrashIcon from "@mui/icons-material/RestoreFromTrash";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import type { Contact } from "../../types/contact";
-import { getInitials, getAvatarColor } from "./ContactRow";
+import { getInitials, getAvatarColor } from "./contactUtils";
 
 interface DeletedContactRowProps {
   contact: Contact;
@@ -17,6 +17,7 @@ export function DeletedContactRow({ contact, onRestore, onPermanentDelete }: Del
 
   return (
     <Box
+      data-testid={`deleted-row-${contact.id}`}
       sx={{
         display: "flex",
         alignItems: "center",
@@ -56,12 +57,12 @@ export function DeletedContactRow({ contact, onRestore, onPermanentDelete }: Del
       </Box>
       <Box sx={{ display: "flex", gap: 0.5, flexShrink: 0 }}>
         <Tooltip title="Wiederherstellen">
-          <IconButton size="small" color="primary" aria-label="Kontakt wiederherstellen" onClick={onRestore}>
+          <IconButton size="small" color="primary" aria-label={`Kontakt wiederherstellen: ${fullName}`} onClick={onRestore}>
             <RestoreFromTrashIcon fontSize="small" />
           </IconButton>
         </Tooltip>
         <Tooltip title="Endgültig löschen">
-          <IconButton size="small" color="error" aria-label="Kontakt endgültig löschen" onClick={onPermanentDelete}>
+          <IconButton size="small" color="error" aria-label={`Kontakt endgültig löschen: ${fullName}`} onClick={onPermanentDelete}>
             <DeleteForeverIcon fontSize="small" />
           </IconButton>
         </Tooltip>

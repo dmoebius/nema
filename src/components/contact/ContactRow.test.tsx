@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { getInitials, getAvatarColor } from "./ContactRow";
+import { getInitials, getAvatarColor } from "./contactUtils";
 import type { Contact } from "../../types/contact";
 
 // Rendering tests for ContactRow are covered by E2E tests (React 19 + jsdom act() issue).

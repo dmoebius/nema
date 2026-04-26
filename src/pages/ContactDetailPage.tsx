@@ -168,7 +168,7 @@ export const ContactDetailPage: React.FC = () => {
   const color = getAvatarColor(fullName);
 
   const handleDelete = async () => {
-    await removeContact(contact.id);
+    await removeContact(contact.id); // IDB + store update; Supabase runs fire-and-forget inside
     navigate("/");
   };
 

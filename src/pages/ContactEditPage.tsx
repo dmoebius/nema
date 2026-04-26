@@ -91,9 +91,17 @@ const sectionHeaderSx = {
 export const ContactEditPage: React.FC = () => {
   const { id } = useParams<{ id?: string }>();
   const navigate = useNavigate();
-  const { getContact, addContact, updateContact, getAllTags, contacts } = useContactsStore();
+  // Stable action selectors — Zustand actions are stable references that never change,
+  // so selecting them individually avoids re-renders when contacts/tags data changes.
+  const getContact = useContactsStore((s) => s.getContact);
+  const addContact = useContactsStore((s) => s.addContact);
+  const updateContact = useContactsStore((s) => s.updateContact);
   const { user } = useAuthStore();
   const isNew = !id || id === "new";
+
+  // Snapshot at mount — contacts and tags won’t change meaningfully during an edit session.
+  // Using snapshots avoids re-renders triggered by background loadContacts() calls.
+  const [contacts] = useState(() => useContactsStore.getState().contacts);
 
   // Lazy state initialization: no useEffect needed, the component is remounted
   // on every new ID via the key reset in App.tsx.
@@ -150,7 +158,8 @@ export const ContactEditPage: React.FC = () => {
   const [saving, setSaving] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  const allTags = getAllTags();
+  // Snapshot at mount – tags won’t change meaningfully during an edit session
+  const [allTags] = useState(() => useContactsStore.getState().getAllTags());
 
   const validate = (): boolean => {
     const e: Record<string, string> = {};

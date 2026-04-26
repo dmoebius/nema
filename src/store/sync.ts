@@ -14,6 +14,7 @@ interface SyncState {
   hasError: boolean;
 
   sync: (userId: string) => Promise<void>;
+  clearError: () => void;
 }
 
 export const useSyncStore = create<SyncState>((set, get) => ({
@@ -50,4 +51,6 @@ export const useSyncStore = create<SyncState>((set, get) => ({
       await useContactsStore.getState().loadContacts();
     }
   },
+
+  clearError: () => set({ error: null, hasError: false }),
 }));

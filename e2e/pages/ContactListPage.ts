@@ -13,7 +13,7 @@ export class ContactListPage {
     this.fab = page.getByRole("button", { name: "Kontakt hinzufügen" });
     this.syncSpinner = page.getByRole("progressbar", { name: "Synchronisierung läuft" });
     this.emptyState = page.getByText("Noch keine Kontakte?");
-    this.showDeletedChip = page.getByText("Ausgeblendete");
+    this.showDeletedChip = page.getByRole("button", { name: "Ausgeblendete" });
     this.emptyDeletedState = page.getByText("Keine ausgeblendeten Kontakte");
   }
 
@@ -66,12 +66,23 @@ export class ContactListPage {
       .getByRole("button", { name: "Kontakt endgültig löschen" });
   }
 
-  // Alternative: find restore/delete buttons by their aria-labels in the deleted view
-  restoreButtonByLabel(): Locator {
-    return this.page.getByRole("button", { name: "Kontakt wiederherstellen" }).first();
+  // Find restore/delete buttons by contact name (aria-label includes full name)
+  restoreButtonByLabel(fullName?: string): Locator {
+    if (fullName) {
+      // ContactListPage uses "Nachname, Vorname" format
+      const [last, first] = fullName.split(", ");
+      const name = [first, last].filter(Boolean).join(" ");
+      return this.page.getByRole("button", { name: `Kontakt wiederherstellen: ${name}` });
+    }
+    return this.page.getByRole("button", { name: /Kontakt wiederherstellen/ }).first();
   }
 
-  permanentDeleteButtonByLabel(): Locator {
-    return this.page.getByRole("button", { name: "Kontakt endgültig löschen" }).first();
+  permanentDeleteButtonByLabel(fullName?: string): Locator {
+    if (fullName) {
+      const [last, first] = fullName.split(", ");
+      const name = [first, last].filter(Boolean).join(" ");
+      return this.page.getByRole("button", { name: `Kontakt endgültig löschen: ${name}` });
+    }
+    return this.page.getByRole("button", { name: /Kontakt endgültig löschen/ }).first();
   }
 }

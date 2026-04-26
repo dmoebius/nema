@@ -41,17 +41,14 @@ interface BeforeInstallPromptEvent extends Event {
 
 export const InstallPrompt: React.FC = () => {
   const [promptEvent, setPromptEvent] = useState<BeforeInstallPromptEvent | null>(null);
-  const [showIosHint, setShowIosHint] = useState(false);
-  const [open, setOpen] = useState(false);
+
+  // Derive initial iOS state eagerly — these checks are pure reads of navigator/window
+  const iosReady = !isInstalled() && !isDismissed() && isIosSafari();
+  const [showIosHint] = useState(iosReady);
+  const [open, setOpen] = useState(iosReady);
 
   useEffect(() => {
-    if (isInstalled() || isDismissed()) return;
-
-    if (isIosSafari()) {
-      setShowIosHint(true);
-      setOpen(true);
-      return;
-    }
+    if (isInstalled() || isDismissed() || isIosSafari()) return;
 
     const handler = (e: Event) => {
       e.preventDefault();

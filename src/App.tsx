@@ -14,7 +14,6 @@ import { useAuthStore } from "./store/auth";
 import { useSyncStore } from "./store/sync";
 import { useContactsStore } from "./store/contacts";
 import { subscribeToChanges } from "./sync/supabaseSync";
-import type { TimestampedContact } from "./sync/merge";
 import { InstallPrompt } from "./components/pwa/InstallPrompt";
 import { ErrorSnackbar } from "./components/feedback/ErrorSnackbar";
 import { useContactsPermission } from "./hooks/useContactsPermission";
@@ -67,8 +66,8 @@ const App: React.FC = () => {
       // Subscribe to realtime changes only after initial load + sync
       channelRef.current = subscribeToChanges(
         user.id,
-        (_updated: TimestampedContact) => loadContacts(),
-        (_deletedId: string) => loadContacts(),
+        () => loadContacts(),
+        () => loadContacts(),
       );
     };
 

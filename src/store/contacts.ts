@@ -37,6 +37,8 @@ interface ContactsState {
   toggleTag: (tag: string) => void;
   setShowDeleted: (v: boolean) => void;
 
+  clearError: () => void;
+
   // Derived / computed helpers
   getContact: (id: string) => Contact | undefined;
   getFilteredContacts: () => Contact[];
@@ -102,12 +104,18 @@ export const useContactsStore = create<ContactsState>((set, get) => ({
   removeContact: async (id) => {
     // Soft-delete: set deletedAt, replicate to Supabase as soft-delete UPDATE
     await softDeleteContact(id);
-    const userId = useAuthStore.getState().user?.id;
-    if (userId) await removeContactFromSupabase(id);
-    // Update in-memory: mark as deleted
+    // Update in-memory immediately so UI reflects the change even if Supabase call fails
     set((state) => ({
       contacts: state.contacts.map((c) => (c.id === id ? { ...c, deletedAt: new Date().toISOString() } : c)),
     }));
+    // Replicate to Supabase fire-and-forget: IDB + store are already updated,
+    // so local navigation is unblocked. Supabase will reconcile on next sync if this fails.
+    const userId = useAuthStore.getState().user?.id;
+    if (userId) {
+      removeContactFromSupabase(id).catch(() => {
+        // best-effort; will reconcile on next sync
+      });
+    }
     // Device sync: soft-deleted contacts are skipped automatically
     if (Capacitor.isNativePlatform()) await runDeviceSync();
   },
@@ -121,13 +129,17 @@ export const useContactsStore = create<ContactsState>((set, get) => ({
       updatedAt: new Date().toISOString(),
     };
     await saveContactToDB(restored);
-    const userId = useAuthStore.getState().user?.id;
-    if (userId) {
-      await pushContact(toTimestamped(restored), userId);
-    }
+    // Update store immediately so UI reflects restore without waiting for Supabase
     set((state) => ({
       contacts: state.contacts.map((c) => (c.id === id ? restored : c)),
     }));
+    // Replicate to Supabase fire-and-forget; will reconcile on next sync if it fails
+    const userId = useAuthStore.getState().user?.id;
+    if (userId) {
+      pushContact(toTimestamped(restored), userId).catch(() => {
+        // best-effort
+      });
+    }
   },
 
   permanentlyDeleteContact: async (id) => {
@@ -135,9 +147,17 @@ export const useContactsStore = create<ContactsState>((set, get) => ({
     // Physical delete from IndexedDB
     await deleteContact(id);
     await deleteSyncBase(id);
-    // Hard delete from Supabase
+    // Update store immediately
+    set((state) => ({
+      contacts: state.contacts.filter((c) => c.id !== id),
+    }));
+    // Hard delete from Supabase fire-and-forget; will reconcile on next sync if it fails
     const userId = useAuthStore.getState().user?.id;
-    if (userId) await hardDeleteContactFromSupabase(id);
+    if (userId) {
+      hardDeleteContactFromSupabase(id).catch(() => {
+        // best-effort
+      });
+    }
     // Remove from device address book if linked
     if (existing?.deviceContactId && Capacitor.isNativePlatform()) {
       try {
@@ -146,9 +166,6 @@ export const useContactsStore = create<ContactsState>((set, get) => ({
         // Device deletion is best-effort; don't fail the whole operation
       }
     }
-    set((state) => ({
-      contacts: state.contacts.filter((c) => c.id !== id),
-    }));
   },
 
   setSearchQuery: (query) => set({ searchQuery: query }),
@@ -163,6 +180,8 @@ export const useContactsStore = create<ContactsState>((set, get) => ({
       set({ selectedTags: [...current, tag] });
     }
   },
+
+  clearError: () => set({ hasError: false }),
 
   setShowDeleted: (v) => set({ showDeleted: v }),
 
