@@ -1,3 +1,4 @@
+import { expect } from "@playwright/test";
 import type { Page, Locator } from "@playwright/test";
 
 export class ContactListPage {
@@ -26,10 +27,15 @@ export class ContactListPage {
   }
 
   async waitForStable() {
-    // Wait for FAB visible and URL to be root
+    // Wait for FAB visible (confirms we are on the list page)
     await this.fab.waitFor({ state: "visible" });
-    // Give React one more tick to settle after any Realtime-triggered re-renders
-    await this.page.waitForTimeout(300);
+    // Wait for any in-flight sync to complete before proceeding
+    await this.waitForSyncIdle();
+  }
+
+  async waitForSyncIdle() {
+    // Wait until the sync spinner is gone — passes immediately if never appeared
+    await expect(this.syncSpinner).not.toBeVisible();
   }
 
   async waitForSyncComplete() {
@@ -54,6 +60,8 @@ export class ContactListPage {
 
   async toggleShowDeleted() {
     await this.showDeletedChip.waitFor({ state: "visible" });
+    // Wait for sync idle so the chip is fully stable before clicking
+    await this.waitForSyncIdle();
     await this.showDeletedChip.click();
   }
 
