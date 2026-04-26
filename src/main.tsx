@@ -1,5 +1,4 @@
 import { StrictMode } from "react";
-THIS_WILL_BREAK_THE_BUILD;
 import { createRoot } from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
 import App from "./App";
