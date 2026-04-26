@@ -51,6 +51,8 @@ async function softDeleteCurrentContact(
   await listPage.waitForReady();
   // Wait for any Supabase Realtime sync triggered by the delete
   await listPage.waitForSyncSettled();
+  // Wait for contact list reload to finish (Realtime events can trigger list re-fetch after delete)
+  await listPage.waitForContactsLoaded();
   // After sync, navigate explicitly to ensure we're on the list
   // (Supabase Realtime + sync completion can trigger ghost-navigations on slower machines)
   if ((await page.url()) !== "http://localhost:5173/") {

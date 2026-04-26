@@ -73,7 +73,7 @@ export function ContactListPage() {
       <Box sx={{ flexGrow: 1, overflow: "auto", px: 1, py: 1 }}>
         {loading ? (
           <Box sx={{ display: "flex", justifyContent: "center", mt: 8 }}>
-            <CircularProgress color="primary" />
+            <CircularProgress color="primary" aria-label="Kontakte werden geladen" />
           </Box>
         ) : contacts.length === 0 ? (
           <Box sx={{ textAlign: "center", mt: 8, px: 4 }}>

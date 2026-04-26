@@ -3,7 +3,7 @@ import { supabase } from "../lib/supabase";
 import type { Contact } from "../types/contact";
 import { mergeContacts, toTimestamped } from "./merge";
 import type { TimestampedContact } from "./merge";
-import { getActiveContacts, saveContact, deleteContact, getSyncBase, setSyncBase, deleteSyncBase } from "../db";
+import { getActiveContacts, getContact, saveContact, deleteContact, getSyncBase, setSyncBase, deleteSyncBase } from "../db";
 
 // Maps Supabase row (snake_case) to local Contact (camelCase)
 function rowToContact(row: Record<string, unknown>): TimestampedContact {
@@ -147,6 +147,14 @@ export function subscribeToChanges(
           onDelete(id);
         } else {
           const contact = rowToContact(payload.new as Record<string, unknown>);
+          // Skip stale Realtime events: if a newer local version exists, don't overwrite it.
+          // This prevents late-arriving events (e.g. from contact creation) from undoing
+          // local soft-deletes or other writes that are ahead of the remote state.
+          const local = await getContact(contact.id);
+          if (local && local.updatedAt > contact.updatedAt) {
+            // Local is newer — skip; the fire-and-forget push will reconcile later
+            return;
+          }
           await saveContact(contact);
           await setSyncBase(contact);
           onUpdate(contact);
