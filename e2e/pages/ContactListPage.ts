@@ -22,7 +22,14 @@ export class ContactListPage {
   }
 
   async waitForReady() {
-    await this.fab.waitFor();
+    await this.fab.waitFor({ state: "visible" });
+  }
+
+  async waitForStable() {
+    // Wait for FAB visible and URL to be root
+    await this.fab.waitFor({ state: "visible" });
+    // Give React one more tick to settle after any Realtime-triggered re-renders
+    await this.page.waitForTimeout(300);
   }
 
   async waitForSyncComplete() {

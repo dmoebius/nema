@@ -27,5 +27,7 @@ export class ContactDetailPage {
     await this.deleteButton.click();
     await this.confirmDeleteButton.waitFor({ state: "visible" });
     await this.confirmDeleteButton.click();
+    // Wait for dialog to close before returning
+    await this.confirmDeleteButton.waitFor({ state: "hidden" });
   }
 }

@@ -44,10 +44,9 @@ async function softDeleteCurrentContact(
 ): Promise<void> {
   const detailPage = new ContactDetailPage(page);
   await detailPage.deleteContact();
-  // After soft-delete: redirected back to list, wait for sync to settle
+  // After soft-delete: redirected back to list, wait for UI to settle
   await expect(page).toHaveURL("/");
-  await listPage.waitForReady();
-  await page.waitForLoadState("networkidle");
+  await listPage.waitForStable();
 }
 
 test.describe("soft-delete flow", () => {
@@ -82,11 +81,10 @@ test.describe("soft-delete flow", () => {
     // Minimal contact must be gone from active list
     await expect(listPage.contactRow(minimalDisplay)).not.toBeVisible();
     // Full contact still in active list
-    const fullRow = listPage.contactRow(fullDisplay);
-    await expect(fullRow).toBeVisible();
+    await expect(listPage.contactRow(fullDisplay)).toBeVisible();
 
     // Step 4: Soft-delete full contact
-    await fullRow.click();
+    await listPage.contactRow(fullDisplay).click();
     await expect(page).toHaveURL(/\/contacts\/[^/]+$/);
     await softDeleteCurrentContact(page, listPage);
 
@@ -105,7 +103,6 @@ test.describe("soft-delete flow", () => {
     await expect(listPage.contactRow(fullDisplay)).toBeVisible();
 
     // Step 6: Restore minimal contact
-    await page.waitForLoadState("networkidle");
     await listPage.restoreButtonByLabel(minimalDisplay).click();
     // After restore, minimal contact disappears from deleted view
     await expect(listPage.contactRow(minimalDisplay)).not.toBeVisible();
@@ -120,7 +117,6 @@ test.describe("soft-delete flow", () => {
     await listPage.toggleShowDeleted();
     await expect(listPage.contactRow(fullDisplay)).toBeVisible();
 
-    await page.waitForLoadState("networkidle");
     await listPage.permanentDeleteButtonByLabel(fullDisplay).click();
     // After permanent delete: full contact gone from deleted view
     await expect(listPage.contactRow(fullDisplay)).not.toBeVisible();
@@ -133,7 +129,6 @@ test.describe("soft-delete flow", () => {
 
     // Final cleanup: permanently delete from deleted view
     await listPage.toggleShowDeleted();
-    await page.waitForLoadState("networkidle");
     await listPage.permanentDeleteButtonByLabel(minimalDisplay).click();
     await expect(listPage.contactRow(minimalDisplay)).not.toBeVisible();
   });
