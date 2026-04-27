@@ -7,7 +7,6 @@ export class ContactListPage {
   readonly emptyState: Locator;
   readonly showDeletedChip: Locator;
   readonly emptyDeletedState: Locator;
-  readonly contactsLoadingSpinner: Locator;
 
   constructor(page: Page) {
     this.page = page;
@@ -16,7 +15,6 @@ export class ContactListPage {
     this.emptyState = page.getByText("Noch keine Kontakte?");
     this.showDeletedChip = page.getByRole("button", { name: "Ausgeblendete" });
     this.emptyDeletedState = page.getByText("Keine ausgeblendeten Kontakte");
-    this.contactsLoadingSpinner = page.getByRole("progressbar", { name: "Kontakte werden geladen" });
   }
 
   async goto() {
@@ -27,27 +25,14 @@ export class ContactListPage {
     await this.fab.waitFor({ state: "visible" });
   }
 
-  /** Wait for any in-flight sync spinner to finish. Safe to call even if spinner never appears. */
+  /** Wait for any in-flight Supabase sync to settle. Safe if spinner never appears. */
   async waitForSyncSettled() {
-    // Give the spinner up to 2s to appear; if it does, wait for it to go away
     const appeared = await this.syncSpinner
       .waitFor({ state: "visible", timeout: 2000 })
       .then(() => true)
       .catch(() => false);
     if (appeared) {
       await this.syncSpinner.waitFor({ state: "hidden" });
-    }
-  }
-
-  /** Wait for any in-flight contacts loading spinner to finish. Safe to call even if spinner never appears. */
-  async waitForContactsLoaded() {
-    // Give the spinner up to 2s to appear; if it does, wait for it to go away
-    const appeared = await this.contactsLoadingSpinner
-      .waitFor({ state: "visible", timeout: 2000 })
-      .then(() => true)
-      .catch(() => false);
-    if (appeared) {
-      await this.contactsLoadingSpinner.waitFor({ state: "hidden" });
     }
   }
 

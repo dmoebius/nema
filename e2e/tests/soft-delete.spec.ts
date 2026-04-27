@@ -44,21 +44,8 @@ async function softDeleteCurrentContact(
 ): Promise<void> {
   const detailPage = new ContactDetailPage(page);
   await detailPage.deleteContact();
-  // Wait for app's own redirect to complete (ensures IDB write is done)
   await expect(page).toHaveURL("/");
-  // Move mouse away from list area to prevent ghost-clicks
-  await page.mouse.move(0, 0);
   await listPage.waitForReady();
-  // Wait for any Supabase Realtime sync triggered by the delete
-  await listPage.waitForSyncSettled();
-  // Wait for contact list reload to finish (Realtime events can trigger list re-fetch after delete)
-  await listPage.waitForContactsLoaded();
-  // After sync, navigate explicitly to ensure we're on the list
-  // (Supabase Realtime + sync completion can trigger ghost-navigations on slower machines)
-  if ((await page.url()) !== "http://localhost:5173/") {
-    await listPage.goto();
-    await listPage.waitForReady();
-  }
 }
 
 test.describe("soft-delete flow", () => {
@@ -99,6 +86,7 @@ test.describe("soft-delete flow", () => {
     await expect(listPage.contactRow(fullDisplay)).not.toBeVisible();
 
     // Step 5: Toggle "Ausgeblendete" view
+    await listPage.waitForSyncSettled();
     await listPage.toggleShowDeleted();
     await expect(listPage.fab).not.toBeVisible();
     await expect(listPage.contactRow(minimalDisplay)).toBeVisible();
