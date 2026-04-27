@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { v4 as uuidv4 } from "uuid";
 import {
@@ -91,6 +91,11 @@ const sectionHeaderSx = {
 export const ContactEditPage: React.FC = () => {
   const { id } = useParams<{ id?: string }>();
   const navigate = useNavigate();
+  const isMounted = useRef(true);
+  useEffect(() => {
+    isMounted.current = true;
+    return () => { isMounted.current = false; };
+  }, []);
   // Stable action selectors — Zustand actions are stable references that never change,
   // so selecting them individually avoids re-renders when contacts/tags data changes.
   const getContact = useContactsStore((s) => s.getContact);
@@ -218,10 +223,10 @@ export const ContactEditPage: React.FC = () => {
 
       if (isNew) {
         const c = await addContact(data, contactId);
-        navigate(`/contacts/${c.id}`, { replace: true });
+        if (isMounted.current) navigate(`/contacts/${c.id}`, { replace: true });
       } else if (id) {
         await updateContact(id, data);
-        navigate(`/contacts/${id}`, { replace: true });
+        if (isMounted.current) navigate(`/contacts/${id}`, { replace: true });
       }
     } finally {
       setSaving(false);
