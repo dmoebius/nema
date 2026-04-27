@@ -1,5 +1,8 @@
 import { create } from "zustand";
+import { Capacitor } from "@capacitor/core";
 import { syncAll } from "../sync/supabaseSync";
+import { getActiveContacts, saveContact } from "../db";
+import { syncWithDeviceContacts } from "../sync/deviceSync";
 import { useContactsStore } from "./contacts";
 
 type SyncStatus = "idle" | "syncing" | "error" | "offline";
@@ -11,6 +14,7 @@ interface SyncState {
   hasError: boolean;
 
   sync: (userId: string) => Promise<void>;
+  clearError: () => void;
 }
 
 export const useSyncStore = create<SyncState>((set, get) => ({
@@ -30,6 +34,14 @@ export const useSyncStore = create<SyncState>((set, get) => ({
     set({ status: "syncing", error: null, hasError: false });
     try {
       await syncAll(userId);
+      // After Supabase sync, also sync with device contacts (native only)
+      if (Capacitor.isNativePlatform()) {
+        const activeContacts = await getActiveContacts();
+        const updated = await syncWithDeviceContacts(activeContacts);
+        for (const c of updated) {
+          await saveContact(c);
+        }
+      }
       set({ status: "idle", lastSyncAt: new Date().toISOString() });
     } catch {
       // Do not expose error details to UI
@@ -39,4 +51,6 @@ export const useSyncStore = create<SyncState>((set, get) => ({
       await useContactsStore.getState().loadContacts();
     }
   },
+
+  clearError: () => set({ error: null, hasError: false }),
 }));

@@ -6,16 +6,16 @@ NeMa (von **Ne**twork**Ma**rketing) ist ein lightweight CRM / Kontaktmanagement-
 
 ## Tech Stack
 
-| Bereich           | Technologie                                        |
-| ----------------- | -------------------------------------------------- |
-| Build / Dev       | Vite, TypeScript                                   |
-| Framework         | React                                              |
-| Routing           | React Router (SPA, BrowserRouter)                  |
-| UI                | Material UI (MUI) + Emotion                        |
-| PWA / Offline     | Serwist                                            |
-| Native App        | Capacitor (Android + iOS)                          |
-| Cloud Storage     | Supabase (DB + Storage + Auth + Realtime)          |
-| Package Manager   | pnpm                                               |
+| Bereich         | Technologie                               |
+| --------------- | ----------------------------------------- |
+| Build / Dev     | Vite, TypeScript                          |
+| Framework       | React                                     |
+| Routing         | React Router (SPA, BrowserRouter)         |
+| UI              | Material UI (MUI) + Emotion               |
+| PWA / Offline   | Serwist                                   |
+| Native App      | Capacitor (Android + iOS)                 |
+| Cloud Storage   | Supabase (DB + Storage + Auth + Realtime) |
+| Package Manager | pnpm                                      |
 
 ### PWA / Offline
 
@@ -38,10 +38,10 @@ NeMa (von **Ne**twork**Ma**rketing) ist ein lightweight CRM / Kontaktmanagement-
 
 ### Branches & Deployments
 
-| Branch | Deployment                            |
-| ------ | ------------------------------------- |
-| `main` | https://nema-app.pages.dev/           |
-| `dev`  | https://dev.nema-app.pages.dev/       |
+| Branch | Deployment                      |
+| ------ | ------------------------------- |
+| `main` | https://nema-app.pages.dev/     |
+| `dev`  | https://dev.nema-app.pages.dev/ |
 
 Build läuft in GitHub Actions, Deploy via Wrangler nach Cloudflare Pages.
 Supabase URL/Key kommen aus GitHub Secrets (nie im Code hardcoden).
@@ -56,11 +56,13 @@ Supabase URL/Key kommen aus GitHub Secrets (nie im Code hardcoden).
 ## Repo-eigene Skills
 
 Skills unter `.agents/skills/` vor jeder Aufgabe berücksichtigen:
+
 1. Die `SKILL.md` jedes Skills lesen (nur Frontmatter/Header + "When to Apply")
 2. Bei passendem Match: nur die relevanten Rule-Dateien vollständig lesen
 3. Nie blind alle Rules laden — nur was zum aktuellen Task passt
 
 Verfügbare Skills:
+
 - `.agents/skills/vercel-react-best-practices/` — React-Performance-Patterns (Rendering, Rerender, Async, Bundle, JS, Server)
 - `.agents/skills/frontend-design/` — UI/Design-Konventionen
 

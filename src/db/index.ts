@@ -13,6 +13,8 @@ interface NemaDB extends DBSchema {
       "by-company": string;
       "by-tags": string[];
       "by-updatedAt": string;
+      "by-deviceContactId": string;
+      "by-deletedAt": string;
     };
   };
   // Stores the last known synced version of each contact (used as merge base)
@@ -23,14 +25,14 @@ interface NemaDB extends DBSchema {
 }
 
 const DB_NAME = "nema-db";
-const DB_VERSION = 2;
+const DB_VERSION = 3;
 
 let dbInstance: IDBPDatabase<NemaDB> | null = null;
 
 export async function getDB(): Promise<IDBPDatabase<NemaDB>> {
   if (dbInstance) return dbInstance;
   dbInstance = await openDB<NemaDB>(DB_NAME, DB_VERSION, {
-    upgrade(db, oldVersion) {
+    upgrade(db, oldVersion, _newVersion, tx) {
       if (oldVersion < 1) {
         const store = db.createObjectStore("contacts", { keyPath: "id" });
         store.createIndex("by-lastName", "lastName");
@@ -41,6 +43,11 @@ export async function getDB(): Promise<IDBPDatabase<NemaDB>> {
       }
       if (oldVersion < 2) {
         db.createObjectStore("syncBase", { keyPath: "id" });
+      }
+      if (oldVersion < 3) {
+        const contactStore = tx.objectStore("contacts");
+        contactStore.createIndex("by-deviceContactId", "deviceContactId", { unique: false });
+        contactStore.createIndex("by-deletedAt", "deletedAt", { unique: false });
       }
     },
   });
@@ -65,6 +72,25 @@ export async function saveContact(contact: Contact): Promise<void> {
 export async function deleteContact(id: string): Promise<void> {
   const db = await getDB();
   await db.delete("contacts", id);
+}
+
+export async function softDeleteContact(id: string): Promise<string | undefined> {
+  const db = await getDB();
+  const contact = await db.get("contacts", id);
+  if (!contact) return undefined;
+  const now = new Date().toISOString();
+  await db.put("contacts", { ...contact, deletedAt: now, updatedAt: now });
+  return now;
+}
+
+export async function getActiveContacts(): Promise<Contact[]> {
+  const contacts = await getAllContacts();
+  return contacts.filter((c) => !c.deletedAt);
+}
+
+export async function getDeletedContacts(): Promise<Contact[]> {
+  const contacts = await getAllContacts();
+  return contacts.filter((c) => !!c.deletedAt);
 }
 
 export async function getAllTags(): Promise<string[]> {

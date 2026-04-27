@@ -13,3 +13,5 @@ public/sw*
 public/swe-worker*
 
 pnpm-lock.yaml
+
+android/

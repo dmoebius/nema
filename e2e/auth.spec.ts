@@ -3,7 +3,6 @@ import { createClient } from "@supabase/supabase-js";
 import { AppMenuPage } from "./pages/AppMenuPage";
 import { ContactListPage } from "./pages/ContactListPage";
 
-
 // ──────────────────────────────────────────────────────────────────────────────
 // Logout test — uses an isolated browser context so it does not invalidate
 // the shared storageState used by all other test files.
@@ -56,5 +55,3 @@ test.describe("authentication — logout", () => {
     await browser.close();
   });
 });
-
-

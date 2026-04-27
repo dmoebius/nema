@@ -1,11 +1,5 @@
 import React, { useEffect, useState } from "react";
-import {
-  Snackbar,
-  Button,
-  Box,
-  Typography,
-  IconButton,
-} from "@mui/material";
+import { Snackbar, Button, Box, Typography, IconButton } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import GetAppIcon from "@mui/icons-material/GetApp";
 
@@ -24,8 +18,7 @@ function isIosSafari(): boolean {
 function isInstalled(): boolean {
   return (
     window.matchMedia("(display-mode: standalone)").matches ||
-    ("standalone" in window.navigator &&
-      (window.navigator as { standalone?: boolean }).standalone === true)
+    ("standalone" in window.navigator && (window.navigator as { standalone?: boolean }).standalone === true)
   );
 }
 
@@ -48,17 +41,14 @@ interface BeforeInstallPromptEvent extends Event {
 
 export const InstallPrompt: React.FC = () => {
   const [promptEvent, setPromptEvent] = useState<BeforeInstallPromptEvent | null>(null);
-  const [showIosHint, setShowIosHint] = useState(false);
-  const [open, setOpen] = useState(false);
+
+  // Derive initial iOS state eagerly — these checks are pure reads of navigator/window
+  const iosReady = !isInstalled() && !isDismissed() && isIosSafari();
+  const [showIosHint] = useState(iosReady);
+  const [open, setOpen] = useState(iosReady);
 
   useEffect(() => {
-    if (isInstalled() || isDismissed()) return;
-
-    if (isIosSafari()) {
-      setShowIosHint(true);
-      setOpen(true);
-      return;
-    }
+    if (isInstalled() || isDismissed() || isIosSafari()) return;
 
     const handler = (e: Event) => {
       e.preventDefault();
@@ -87,11 +77,7 @@ export const InstallPrompt: React.FC = () => {
   if (!open) return null;
 
   return (
-    <Snackbar
-      open={open}
-      anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
-      sx={{ mb: 8 }}
-    >
+    <Snackbar open={open} anchorOrigin={{ vertical: "bottom", horizontal: "center" }} sx={{ mb: 8 }}>
       <Box
         sx={{
           bgcolor: "background.paper",
@@ -124,12 +110,7 @@ export const InstallPrompt: React.FC = () => {
               <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
                 Füge nema zum Home-Bildschirm hinzu für schnellen Zugriff.
               </Typography>
-              <Button
-                size="small"
-                variant="contained"
-                onClick={handleInstall}
-                sx={{ borderRadius: 1.5 }}
-              >
+              <Button size="small" variant="contained" onClick={handleInstall} sx={{ borderRadius: 1.5 }}>
                 Installieren
               </Button>
             </>

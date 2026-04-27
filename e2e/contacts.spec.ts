@@ -43,9 +43,7 @@ async function createContact(
 }
 
 test.describe("contact management", () => {
-  test("create minimal and full contact, verify list order, reload and verify persistence", async ({
-    page,
-  }) => {
+  test("create minimal and full contact, verify list order, reload and verify persistence", async ({ page }) => {
     const listPage = new ContactListPage(page);
     const detailPage = new ContactDetailPage(page);
 
@@ -96,7 +94,7 @@ test.describe("contact management", () => {
     // Timestamps must be unchanged after reload+sync (no spurious re-save).
     // Compare as epoch ms — Supabase may return a different ISO-8601 format
     // (e.g. "+00:00" suffix vs "Z", microseconds vs milliseconds) after sync.
-    const toMs = (ts: string | null) => ts ? new Date(ts).getTime() : null;
+    const toMs = (ts: string | null) => (ts ? new Date(ts).getTime() : null);
 
     await listPage.contactRow(minimalDisplay).click();
     await expect(detailPage.updatedAt).toBeVisible();

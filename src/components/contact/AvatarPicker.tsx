@@ -91,7 +91,7 @@ export const AvatarPicker: React.FC<AvatarPickerProps> = ({
       )}
 
       {/* Delete button */}
-      {!uploading && (displayUrl) && onDelete && (
+      {!uploading && displayUrl && onDelete && (
         <IconButton
           size="small"
           data-testid="delete-avatar-btn"
@@ -111,13 +111,7 @@ export const AvatarPicker: React.FC<AvatarPickerProps> = ({
         </IconButton>
       )}
 
-      <input
-        ref={inputRef}
-        type="file"
-        accept="image/*"
-        style={{ display: "none" }}
-        onChange={handleFileChange}
-      />
+      <input ref={inputRef} type="file" accept="image/*" style={{ display: "none" }} onChange={handleFileChange} />
     </Box>
   );
 };

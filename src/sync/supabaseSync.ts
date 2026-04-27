@@ -3,14 +3,7 @@ import { supabase } from "../lib/supabase";
 import type { Contact } from "../types/contact";
 import { mergeContacts, toTimestamped } from "./merge";
 import type { TimestampedContact } from "./merge";
-import {
-  getAllContacts,
-  saveContact,
-  deleteContact,
-  getSyncBase,
-  setSyncBase,
-  deleteSyncBase,
-} from "../db";
+import { getAllContacts, getContact, saveContact, deleteContact, getSyncBase, setSyncBase, deleteSyncBase } from "../db";
 
 // Maps Supabase row (snake_case) to local Contact (camelCase)
 function rowToContact(row: Record<string, unknown>): TimestampedContact {
@@ -23,6 +16,8 @@ function rowToContact(row: Record<string, unknown>): TimestampedContact {
     note: row.note as string | undefined,
     avatarUrl: row.avatar_url as string | undefined,
     sponsorId: row.sponsor_id as string | undefined,
+    deviceContactId: row.device_contact_id as string | undefined,
+    deletedAt: row.deleted_at as string | undefined,
     phones: (row.phones as Contact["phones"]) ?? [],
     emails: (row.emails as Contact["emails"]) ?? [],
     addresses: (row.addresses as Contact["addresses"]) ?? [],
@@ -45,6 +40,8 @@ function contactToRow(contact: TimestampedContact, userId: string): Record<strin
     note: contact.note ?? null,
     avatar_url: contact.avatarUrl ?? null,
     sponsor_id: contact.sponsorId ?? null,
+    device_contact_id: contact.deviceContactId ?? null,
+    deleted_at: contact.deletedAt ?? null,
     phones: contact.phones,
     emails: contact.emails,
     addresses: contact.addresses,
@@ -54,12 +51,9 @@ function contactToRow(contact: TimestampedContact, userId: string): Record<strin
   };
 }
 
-// Fetch all contacts for the current user from Supabase
+// Fetch all active (non-deleted) contacts for the current user from Supabase
 export async function pullContacts(): Promise<TimestampedContact[]> {
-  const { data, error } = await supabase
-    .from("contacts")
-    .select("*")
-    .order("last_name");
+  const { data, error } = await supabase.from("contacts").select("*").is("deleted_at", null).order("last_name");
 
   if (error) throw new Error(error.message);
   return (data ?? []).map((row) => rowToContact(row as Record<string, unknown>));
@@ -67,27 +61,42 @@ export async function pullContacts(): Promise<TimestampedContact[]> {
 
 // Push a single contact to Supabase (upsert)
 export async function pushContact(contact: TimestampedContact, userId: string): Promise<void> {
-  const { error } = await supabase
-    .from("contacts")
-    .upsert(contactToRow(contact, userId));
+  const { error } = await supabase.from("contacts").upsert(contactToRow(contact, userId));
 
   if (error) throw new Error(error.message);
 }
 
-// Remove a contact from Supabase
-export async function removeContactFromSupabase(id: string): Promise<void> {
+// Soft-delete a contact in Supabase (sets deleted_at + updated_at instead of hard delete).
+// Pass the same `updatedAt` timestamp used for the local IDB write so that the stale-event
+// guard in subscribeToChanges (local.updatedAt >= remote.updatedAt) works correctly: without
+// a matching updated_at bump the Realtime UPDATE would look equal-age to the local record
+// and any subsequent late-arriving creation event could overwrite the soft-delete.
+export async function removeContactFromSupabase(id: string, updatedAt?: string): Promise<void> {
+  const now = updatedAt ?? new Date().toISOString();
+  const { error } = await supabase
+    .from("contacts")
+    .update({ deleted_at: now, updated_at: now })
+    .eq("id", id);
+  if (error) throw new Error(error.message);
+}
+
+// Hard-delete a contact from Supabase (permanent, used only in "Ausgeblendete" view)
+export async function hardDeleteContactFromSupabase(id: string): Promise<void> {
   const { error } = await supabase.from("contacts").delete().eq("id", id);
   if (error) throw new Error(error.message);
 }
 
-// Full sync: pull remote, merge with local, push conflicts resolved
+// Full sync: pull remote (active only), merge with local active contacts, push conflicts resolved
 export async function syncAll(userId: string): Promise<void> {
-  const [remoteContacts, localContacts] = await Promise.all([
-    pullContacts(),
-    getAllContacts(),
-  ]);
+  // Use getAllContacts (active + soft-deleted) so that a locally soft-deleted contact
+  // is never overwritten by the still-active remote version when the Supabase UPDATE
+  // from removeContactFromSupabase is still in-flight (fire-and-forget race).
+  const [remoteContacts, allLocalContacts] = await Promise.all([pullContacts(), getAllContacts()]);
 
-  const localMap = new Map(localContacts.map((c) => [c.id, c]));
+  // Active-only map for merge logic; full map for soft-delete guard
+  const localActiveContacts = allLocalContacts.filter((c) => !c.deletedAt);
+  const localMap = new Map(localActiveContacts.map((c) => [c.id, c]));
+  const allLocalMap = new Map(allLocalContacts.map((c) => [c.id, c]));
   const remoteMap = new Map(remoteContacts.map((c) => [c.id, c]));
   const allIds = new Set([...localMap.keys(), ...remoteMap.keys()]);
 
@@ -96,7 +105,17 @@ export async function syncAll(userId: string): Promise<void> {
     const remote = remoteMap.get(id);
 
     if (remote && !local) {
-      // Only on remote → save locally
+      // Contact is active on remote but not in local active map.
+      // Check if it exists locally as soft-deleted: if so, and the local updatedAt is
+      // >= remote updatedAt, the local soft-delete is at least as new as the remote
+      // active version — respect it and skip the overwrite.
+      // This fixes the race where removeContactFromSupabase (fire-and-forget) hasn't
+      // reached Supabase yet when syncAll runs.
+      const localAll = allLocalMap.get(id);
+      if (localAll?.deletedAt && localAll.updatedAt >= remote.updatedAt) {
+        continue;
+      }
+      // Genuinely only on remote (or remote is newer than local soft-delete) → save locally
       await saveContact(remote);
       await setSyncBase(remote);
       continue;
@@ -152,6 +171,16 @@ export function subscribeToChanges(
           onDelete(id);
         } else {
           const contact = rowToContact(payload.new as Record<string, unknown>);
+          // Skip stale Realtime events: if a newer local version exists, don't overwrite it.
+          // This prevents late-arriving events (e.g. from contact creation) from undoing
+          // local soft-deletes or other writes that are ahead of the remote state.
+          const local = await getContact(contact.id);
+          if (local && local.updatedAt >= contact.updatedAt) {
+            // Local is at least as new — skip; prevents a late-arriving Realtime event
+            // (e.g. the creation INSERT arriving after a soft-delete) from overwriting
+            // local state that is equal-age or newer (same-millisecond race on fast CI).
+            return;
+          }
           await saveContact(contact);
           await setSyncBase(contact);
           onUpdate(contact);

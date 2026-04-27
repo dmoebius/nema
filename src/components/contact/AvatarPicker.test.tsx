@@ -11,10 +11,9 @@ describe("AvatarPicker props validation", () => {
 
   it("onDelete is optional", () => {
     // Props interface allows onDelete to be undefined
-    const props: { onFileSelected: (f: File) => void; onDelete?: () => void } =
-      {
-        onFileSelected: vi.fn(),
-      };
+    const props: { onFileSelected: (f: File) => void; onDelete?: () => void } = {
+      onFileSelected: vi.fn(),
+    };
     expect(props.onDelete).toBeUndefined();
   });
 

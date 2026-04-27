@@ -5,6 +5,7 @@ import { toTimestamped } from "./merge";
 // Mock IndexedDB helpers
 vi.mock("../db", () => ({
   getAllContacts: vi.fn(),
+  getActiveContacts: vi.fn(),
   saveContact: vi.fn(),
   deleteContact: vi.fn(),
   getSyncBase: vi.fn(),
@@ -41,9 +42,11 @@ const makeContact = (overrides: Partial<Contact> = {}): Contact => ({
 
 const makeSupabaseChain = (data: unknown[], error: unknown = null) => ({
   select: vi.fn().mockReturnThis(),
+  is: vi.fn().mockReturnThis(),
   order: vi.fn().mockResolvedValue({ data, error }),
   upsert: vi.fn().mockResolvedValue({ error: null }),
   delete: vi.fn().mockReturnThis(),
+  update: vi.fn().mockReturnThis(),
   eq: vi.fn().mockResolvedValue({ error: null }),
 });
 
@@ -110,6 +113,39 @@ describe("syncAll", () => {
     await syncAll(userId);
 
     // saveContact should not be called for unchanged contacts
+    expect(db.saveContact).not.toHaveBeenCalled();
+  });
+
+  it("does not overwrite locally soft-deleted contact with remote active version", async () => {
+    // Simulates the race where removeContactFromSupabase (fire-and-forget) hasn't
+    // reached Supabase yet, so the contact still appears active on remote.
+    const deletedAt = "2024-01-02T00:00:01Z";
+    const localSoftDeleted = makeContact({
+      id: "contact-1",
+      updatedAt: deletedAt,
+      deletedAt,
+    });
+    const remoteRow = {
+      id: "contact-1",
+      first_name: "Max",
+      last_name: "Mustermann",
+      phones: [],
+      emails: [],
+      addresses: [],
+      tags: [],
+      field_timestamps: {},
+      deleted_at: null,
+      created_at: "2024-01-01T00:00:00Z",
+      updated_at: "2024-01-01T00:00:00Z", // older than local soft-delete
+    };
+
+    vi.mocked(supabase.from).mockReturnValue(makeSupabaseChain([remoteRow]) as never);
+    vi.mocked(db.getAllContacts).mockResolvedValue([localSoftDeleted]);
+    vi.mocked(db.getSyncBase).mockResolvedValue(undefined);
+
+    await syncAll(userId);
+
+    // Must NOT overwrite IDB with the remote active version
     expect(db.saveContact).not.toHaveBeenCalled();
   });
 });

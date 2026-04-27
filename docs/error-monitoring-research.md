@@ -3,6 +3,7 @@
 ## Ziel
 
 JavaScript-Fehler aus der PWA an einen Server senden, sodass:
+
 - **Dirk** die Logs einsehen kann (Dashboard)
 - **Alfred (Agent)** die Logs per API abfragen und auf Muster reagieren kann
 
@@ -13,8 +14,12 @@ JavaScript-Fehler aus der PWA an einen Server senden, sodass:
 Grundlage für jede Lösung:
 
 ```js
-window.onerror = (msg, src, line, col, error) => { /* senden */ };
-window.addEventListener("unhandledrejection", (e) => { /* senden */ });
+window.onerror = (msg, src, line, col, error) => {
+  /* senden */
+};
+window.addEventListener("unhandledrejection", (e) => {
+  /* senden */
+});
 ```
 
 `navigator.sendBeacon()` eignet sich für das Senden beim Seitenschluss (zuverlässiger als `fetch`).
@@ -28,6 +33,7 @@ window.addEventListener("unhandledrejection", (e) => { /* senden */ });
 **Free Tier:** 5.000 Fehler/Monat — für nema mehr als ausreichend.
 
 **Vorteile:**
+
 - Einfachste Integration: `@sentry/react` Package, 5 Zeilen Config
 - Source Maps Support → lesbare Stack Traces trotz minifiziertem Build
 - Dashboard mit Fehler-Gruppierung, Häufigkeit, Release-Tracking
@@ -35,10 +41,12 @@ window.addEventListener("unhandledrejection", (e) => { /* senden */ });
 - Vite-Plugin für automatisches Source Map Upload
 
 **Nachteile:**
+
 - Externe SaaS (US-Server) — kein Self-Hosting im Free Tier
 - Nach 5.000 Fehlern/Monat werden Events gedroppt (nicht fakturiert)
 
 **Integration:**
+
 ```bash
 pnpm add @sentry/react
 pnpm add -D @sentry/vite-plugin
@@ -58,11 +66,13 @@ DSN kommt als GitHub Secret `VITE_SENTRY_DSN` → kein Hardcoding.
 **Free Tier:** 500 Sessions/Monat + unbegrenzte Fehler (Stand 2024).
 
 **Vorteile:**
+
 - Open Source (selbst hostbar auf eigenem VPS)
 - Session Replay: Dirk sieht genau was der User vor dem Fehler gemacht hat
 - Ebenfalls REST API vorhanden
 
 **Nachteile:**
+
 - Kleinere Community als Sentry
 - Self-Hosting erfordert eigenen Server (den wir nicht haben)
 
@@ -87,11 +97,13 @@ create table error_logs (
 ```
 
 **Vorteile:**
+
 - Keine externe Abhängigkeit
 - Alfred kann direkt per Supabase API die Logs lesen und reagieren
 - Volle Kontrolle über Datenformat
 
 **Nachteile:**
+
 - Kein Dashboard (müsste selbst gebaut werden)
 - Kein Source Map Support
 - Rate Limiting muss selbst implementiert werden (Angreifer könnte DB fluten)
@@ -106,10 +118,12 @@ Fehler-Endpoint als Cloudflare Worker, Logs in D1 (SQLite).
 **Free Tier:** 100.000 Worker-Requests/Tag, 5 GB D1.
 
 **Vorteile:**
+
 - Edge-nah, sehr schnell
 - Komplett kostenlos für nema-Größe
 
 **Nachteile:**
+
 - Mehr Infrastruktur zu pflegen
 - Kein fertiges Dashboard
 
@@ -118,19 +132,29 @@ Fehler-Endpoint als Cloudflare Worker, Logs in D1 (SQLite).
 ## Wie kann Alfred reagieren?
 
 ### Sentry (bevorzugt)
+
 Sentry API erlaubt:
+
 ```
 GET /api/0/projects/{org}/{project}/issues/
 ```
+
 Alfred kann periodisch (per OpenClaw Cron) neue Issues abfragen und Dirk per Telegram benachrichtigen wenn:
+
 - Ein neuer Fehler-Typ auftaucht
 - Ein Fehler >10x in 1h auftritt
 - Ein kritischer Fehler gemeldet wird
 
 ### Supabase DIY
+
 Alfred liest direkt:
+
 ```ts
-supabase.from("error_logs").select("*").order("created_at", { ascending: false }).limit(50)
+supabase
+  .from("error_logs")
+  .select("*")
+  .order("created_at", { ascending: false })
+  .limit(50);
 ```
 
 ---
@@ -149,6 +173,7 @@ supabase.from("error_logs").select("*").order("created_at", { ascending: false }
 ## Empfehlung für nema
 
 **Sentry** ist die beste Wahl:
+
 - Minimaler Aufwand (1 Package, 5 Zeilen)
 - Free Tier reicht locker
 - Alfred kann per Sentry API reagieren

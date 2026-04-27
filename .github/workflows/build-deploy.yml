@@ -25,7 +25,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: '22'
+          node-version: "22"
           cache: pnpm
 
       - name: Install dependencies
@@ -53,6 +53,20 @@ jobs:
           keystore-password: ${{ secrets.KEYSTORE_PASSWORD }}
           key-alias: ${{ vars.KEY_ALIAS }}
           key-password: ${{ secrets.KEY_PASSWORD }}
+
+      - name: Sanitize branch name for artifact
+        if: github.ref_name != 'main' && github.ref_name != 'dev'
+        id: sanitize
+        run: echo "branch=${GITHUB_REF_NAME//\//-}" >> "$GITHUB_OUTPUT"
+
+      - name: Upload APK Artifact (feature branches)
+        if: github.ref_name != 'main' && github.ref_name != 'dev'
+        uses: actions/upload-artifact@v4
+        with:
+          # Use sanitized branch name (slashes replaced with dashes) — upload-artifact@v4 forbids slashes
+          name: nema-${{ steps.sanitize.outputs.branch }}-${{ github.run_number }}.apk
+          path: nema-release.apk
+          retention-days: 14
 
       - name: Create GitHub Release with APK
         if: github.ref_name == 'main' || github.ref_name == 'dev'
@@ -118,24 +132,6 @@ jobs:
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_URL }}
         run: |
-          BRANCH='${{ github.ref_name }}'
-          RUN_NUMBER='${{ github.run_number }}'
-          RUN_URL='${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}'
-          ACTOR='${{ github.actor }}'
-          COMMIT_SHA=$(git rev-parse --short HEAD 2>/dev/null || echo "unknown")
-          COMMIT_MSG=$(git log -1 --pretty=format:%s 2>/dev/null | head -c 80 | tr -d '"\\' || echo "unknown")
           curl -sf -X POST "$DISCORD_WEBHOOK" \
             -H "Content-Type: application/json" \
-            --data-binary "{
-              \"embeds\": [{
-                \"title\": \"❌ nema Pipeline fehlgeschlagen\",
-                \"color\": 15158332,
-                \"fields\": [
-                  {\"name\": \"Branch\", \"value\": \"\`${BRANCH}\`\", \"inline\": true},
-                  {\"name\": \"Run\", \"value\": \"[#${RUN_NUMBER}](${RUN_URL})\", \"inline\": true},
-                  {\"name\": \"Commit\", \"value\": \"\`${COMMIT_SHA}\` ${COMMIT_MSG}\", \"inline\": false},
-                  {\"name\": \"Ausgelöst von\", \"value\": \"${ACTOR}\", \"inline\": true}
-                ],
-                \"footer\": {\"text\": \"nema CI\"}
-              }]
-            }"
+            -d "{\"content\": \"❌ **nema Pipeline** — \`${{ github.ref_name }}\` fehlgeschlagen ([Run #${{ github.run_number }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}))\"}"

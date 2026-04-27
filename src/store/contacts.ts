@@ -1,10 +1,21 @@
 import { create } from "zustand";
 import { v4 as uuidv4 } from "uuid";
+import { Capacitor } from "@capacitor/core";
 import type { Contact, ContactFormData } from "../types/contact";
-import { getAllContacts, saveContact, deleteContact, deleteSyncBase } from "../db";
+import {
+  getAllContacts,
+  getActiveContacts,
+  saveContact as saveContactToDB,
+  deleteContact,
+  softDeleteContact,
+  deleteSyncBase,
+} from "../db";
 import { useAuthStore } from "./auth";
 import { useSyncStore } from "./sync";
-import { removeContactFromSupabase } from "../sync/supabaseSync";
+import { removeContactFromSupabase, hardDeleteContactFromSupabase, pushContact } from "../sync/supabaseSync";
+import { Contacts } from "@capacitor-community/contacts";
+import { syncWithDeviceContacts } from "../sync/deviceSync";
+import { toTimestamped } from "../sync/merge";
 
 interface ContactsState {
   contacts: Contact[];
@@ -12,15 +23,21 @@ interface ContactsState {
   hasError: boolean;
   searchQuery: string;
   selectedTags: string[];
+  showDeleted: boolean;
 
   // Actions
   loadContacts: () => Promise<void>;
   addContact: (data: ContactFormData, id?: string) => Promise<Contact>;
   updateContact: (id: string, data: ContactFormData) => Promise<void>;
   removeContact: (id: string) => Promise<void>;
+  restoreContact: (id: string) => Promise<void>;
+  permanentlyDeleteContact: (id: string) => Promise<void>;
   setSearchQuery: (query: string) => void;
   setSelectedTags: (tags: string[]) => void;
   toggleTag: (tag: string) => void;
+  setShowDeleted: (v: boolean) => void;
+
+  clearError: () => void;
 
   // Derived / computed helpers
   getContact: (id: string) => Contact | undefined;
@@ -34,10 +51,12 @@ export const useContactsStore = create<ContactsState>((set, get) => ({
   hasError: false,
   searchQuery: "",
   selectedTags: [],
+  showDeleted: false,
 
   loadContacts: async () => {
     set({ loading: true, hasError: false });
     try {
+      // Load ALL contacts (active + deleted) — callers filter via getFilteredContacts
       const contacts = await getAllContacts();
       set({ contacts, loading: false });
     } catch {
@@ -53,10 +72,12 @@ export const useContactsStore = create<ContactsState>((set, get) => ({
       createdAt: now,
       updatedAt: now,
     };
-    await saveContact(contact);
+    await saveContactToDB(contact);
     set((state) => ({ contacts: [...state.contacts, contact] }));
     const userId = useAuthStore.getState().user?.id;
     if (userId) await useSyncStore.getState().sync(userId);
+    // Device sync after add
+    if (Capacitor.isNativePlatform()) await runDeviceSync();
     return contact;
   },
 
@@ -70,23 +91,84 @@ export const useContactsStore = create<ContactsState>((set, get) => ({
       createdAt: existing.createdAt,
       updatedAt: new Date().toISOString(),
     };
-    await saveContact(updated);
+    await saveContactToDB(updated);
     set((state) => ({
       contacts: state.contacts.map((c) => (c.id === id ? updated : c)),
     }));
     const userId = useAuthStore.getState().user?.id;
     if (userId) await useSyncStore.getState().sync(userId);
+    // Device sync after update
+    if (Capacitor.isNativePlatform()) await runDeviceSync();
   },
 
   removeContact: async (id) => {
-    // Delete from Supabase first, then locally — prevents sync from restoring the contact
+    // Soft-delete: set deletedAt + updatedAt so the stale-event guard in the Realtime
+    // handler (local.updatedAt > remote.updatedAt) can correctly skip any late-arriving
+    // Realtime events from before the soft-delete (e.g. the creation sync upsert).
+    const deletedAt = await softDeleteContact(id);
+    const now = deletedAt ?? new Date().toISOString();
+    // Update in-memory immediately so UI reflects the change even if Supabase call fails
+    set((state) => ({
+      contacts: state.contacts.map((c) => (c.id === id ? { ...c, deletedAt: now, updatedAt: now } : c)),
+    }));
+    // Replicate to Supabase fire-and-forget: IDB + store are already updated,
+    // so local navigation is unblocked. Supabase will reconcile on next sync if this fails.
     const userId = useAuthStore.getState().user?.id;
-    if (userId) await removeContactFromSupabase(id);
+    if (userId) {
+      removeContactFromSupabase(id, now).catch(() => {
+        // best-effort; will reconcile on next sync
+      });
+    }
+    // Device sync: soft-deleted contacts are skipped automatically
+    if (Capacitor.isNativePlatform()) await runDeviceSync();
+  },
+
+  restoreContact: async (id) => {
+    const existing = get().contacts.find((c) => c.id === id);
+    if (!existing) return;
+    const restored: Contact = {
+      ...existing,
+      deletedAt: undefined,
+      updatedAt: new Date().toISOString(),
+    };
+    await saveContactToDB(restored);
+    // Update store immediately so UI reflects restore without waiting for Supabase
+    set((state) => ({
+      contacts: state.contacts.map((c) => (c.id === id ? restored : c)),
+    }));
+    // Replicate to Supabase fire-and-forget; will reconcile on next sync if it fails
+    const userId = useAuthStore.getState().user?.id;
+    if (userId) {
+      pushContact(toTimestamped(restored), userId).catch(() => {
+        // best-effort
+      });
+    }
+  },
+
+  permanentlyDeleteContact: async (id) => {
+    const existing = get().contacts.find((c) => c.id === id);
+    // Physical delete from IndexedDB
     await deleteContact(id);
     await deleteSyncBase(id);
+    // Update store immediately
     set((state) => ({
       contacts: state.contacts.filter((c) => c.id !== id),
     }));
+    // Hard delete from Supabase fire-and-forget; will reconcile on next sync if it fails
+    const userId = useAuthStore.getState().user?.id;
+    if (userId) {
+      hardDeleteContactFromSupabase(id).catch(() => {
+        // best-effort
+      });
+    }
+    // Remove from device address book if linked
+    if (existing?.deviceContactId && Capacitor.isNativePlatform()) {
+      try {
+        await Contacts.deleteContact({ contactId: existing.deviceContactId });
+      } catch {
+        // Device deletion is best-effort; don't fail the whole operation
+      }
+    }
   },
 
   setSearchQuery: (query) => set({ searchQuery: query }),
@@ -102,11 +184,29 @@ export const useContactsStore = create<ContactsState>((set, get) => ({
     }
   },
 
-  getContact: (id) => get().contacts.find((c) => c.id === id),
+  clearError: () => set({ hasError: false }),
+
+  setShowDeleted: (v) => set({ showDeleted: v }),
+
+  // Only return active (non-deleted) contacts — deleted contacts are no longer accessible via detail view
+  getContact: (id) => get().contacts.find((c) => c.id === id && !c.deletedAt),
 
   getFilteredContacts: () => {
-    const { contacts, searchQuery, selectedTags } = get();
-    let result = [...contacts];
+    const { contacts, searchQuery, selectedTags, showDeleted } = get();
+
+    if (showDeleted) {
+      // Deleted view: only soft-deleted contacts, no search/tag filters
+      return contacts
+        .filter((c) => !!c.deletedAt)
+        .sort((a, b) => {
+          const aName = `${a.lastName} ${a.firstName}`.toLowerCase();
+          const bName = `${b.lastName} ${b.firstName}`.toLowerCase();
+          return aName.localeCompare(bName, "de");
+        });
+    }
+
+    // Active view: only non-deleted contacts
+    let result = contacts.filter((c) => !c.deletedAt);
 
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
@@ -139,7 +239,18 @@ export const useContactsStore = create<ContactsState>((set, get) => ({
   getAllTags: () => {
     const { contacts } = get();
     const tagSet = new Set<string>();
-    contacts.forEach((c) => c.tags.forEach((t) => tagSet.add(t)));
+    // Only include tags from active (non-deleted) contacts
+    contacts.filter((c) => !c.deletedAt).forEach((c) => c.tags.forEach((t) => tagSet.add(t)));
     return Array.from(tagSet).sort((a, b) => a.localeCompare(b, "de"));
   },
 }));
+
+// Internal helper: run device sync with active contacts, persist results to IndexedDB
+async function runDeviceSync(): Promise<void> {
+  const activeContacts = await getActiveContacts();
+  const updated = await syncWithDeviceContacts(activeContacts);
+  for (const c of updated) {
+    await saveContactToDB(c);
+  }
+  await useContactsStore.getState().loadContacts();
+}

@@ -17,6 +17,7 @@ nema Web (PC)
 ```
 
 **Sync-Regeln:**
+
 - last-write-wins überall, basierend auf `updated_at` Timestamp
 - Telefonbuch-Sync nur auf Android (`Capacitor.isNativePlatform()`)
 - TB gelöscht → nema löscht → Supabase löscht → PC sieht's weg
@@ -70,4 +71,4 @@ Ziel: APK bauen, auf echtem Gerät testen — noch **ohne** Telefonbuch-Zugriff.
 
 ---
 
-*Erstellt: 2026-04-03 — Planung im #nema Discord-Channel*
+_Erstellt: 2026-04-03 — Planung im #nema Discord-Channel_

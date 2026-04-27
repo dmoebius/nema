@@ -36,6 +36,8 @@ export interface Contact {
   avatarUrl?: string;
   tags: string[];
   sponsorId?: string;
+  deviceContactId?: string;
+  deletedAt?: string;
   createdAt: string;
   updatedAt: string;
 }

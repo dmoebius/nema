@@ -1,6 +1,7 @@
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import { AppBar, Toolbar, Typography, Box, IconButton, CircularProgress } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import SettingsIcon from "@mui/icons-material/Settings";
 import { useSyncStore } from "../store/sync";
 import { AppMenu } from "./layout/AppMenu";
 
@@ -52,13 +53,20 @@ export function Layout({ title = "nema", showBack = false }: LayoutProps) {
               aria-label="Synchronisierung läuft"
             />
           )}
+          {isRoot && (
+            <IconButton
+              color="inherit"
+              aria-label="Einstellungen"
+              onClick={() => navigate("/settings")}
+              sx={{ opacity: 0.9 }}
+            >
+              <SettingsIcon />
+            </IconButton>
+          )}
           <AppMenu />
         </Toolbar>
       </AppBar>
-      <Box
-        component="main"
-        sx={{ flexGrow: 1, overflow: "auto", bgcolor: "background.default" }}
-      >
+      <Box component="main" sx={{ flexGrow: 1, overflow: "auto", bgcolor: "background.default" }}>
         <Outlet />
       </Box>
     </Box>

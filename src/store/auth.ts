@@ -22,7 +22,9 @@ export const useAuthStore = create<AuthState>((set) => ({
 
   initialize: async () => {
     // Restore existing session from localStorage
-    const { data: { session } } = await supabase.auth.getSession();
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
     set({ session, user: session?.user ?? null, loading: false });
 
     // Listen for auth state changes (login, logout, token refresh)

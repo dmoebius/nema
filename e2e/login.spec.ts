@@ -33,10 +33,7 @@ test.describe("login page", () => {
   test("successful login redirects to contact list", async ({ page }) => {
     await page.goto("/");
     const loginPage = new LoginPage(page);
-    await loginPage.login(
-      process.env.E2E_TEST_EMAIL!,
-      process.env.E2E_TEST_PASSWORD!
-    );
+    await loginPage.login(process.env.E2E_TEST_EMAIL!, process.env.E2E_TEST_PASSWORD!);
     await expect(page).toHaveURL("/");
     await expect(page.getByRole("heading", { name: "nema" })).toBeVisible();
   });

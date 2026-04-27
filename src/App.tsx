@@ -7,13 +7,13 @@ import { Layout } from "./components/Layout";
 import { ContactListPage } from "./pages/ContactListPage";
 import { ContactDetailPage } from "./pages/ContactDetailPage";
 import { ContactEditPage } from "./pages/ContactEditPage";
+import { SettingsPage } from "./pages/SettingsPage";
 import { AuthGuard } from "./components/auth/AuthGuard";
 import { ResetPasswordPage } from "./components/auth/ResetPasswordPage";
 import { useAuthStore } from "./store/auth";
 import { useSyncStore } from "./store/sync";
 import { useContactsStore } from "./store/contacts";
 import { subscribeToChanges } from "./sync/supabaseSync";
-import type { TimestampedContact } from "./sync/merge";
 import { InstallPrompt } from "./components/pwa/InstallPrompt";
 import { ErrorSnackbar } from "./components/feedback/ErrorSnackbar";
 import { useContactsPermission } from "./hooks/useContactsPermission";
@@ -35,6 +35,9 @@ const AppRoutes: React.FC = () => {
         <Route path="/contacts/new" element={<ContactEditPageKeyed />} />
         <Route path="/contacts/:id" element={<ContactDetailPage />} />
         <Route path="/contacts/:id/edit" element={<ContactEditPageKeyed />} />
+      </Route>
+      <Route element={<Layout title="Einstellungen" showBack />}>
+        <Route path="/settings" element={<SettingsPage />} />
       </Route>
       <Route path="/reset-password" element={<ResetPasswordPage />} />
       <Route path="*" element={<Navigate to="/" replace />} />
@@ -63,8 +66,8 @@ const App: React.FC = () => {
       // Subscribe to realtime changes only after initial load + sync
       channelRef.current = subscribeToChanges(
         user.id,
-        (_updated: TimestampedContact) => loadContacts(),
-        (_deletedId: string) => loadContacts(),
+        () => loadContacts(),
+        () => loadContacts(),
       );
     };
 
