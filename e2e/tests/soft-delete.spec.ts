@@ -44,8 +44,19 @@ async function softDeleteCurrentContact(
 ): Promise<void> {
   const detailPage = new ContactDetailPage(page);
   await detailPage.deleteContact();
+  // Wait for app's own redirect to complete (ensures IDB write is done)
   await expect(page).toHaveURL("/");
+  // Move mouse away from list area to prevent ghost-clicks on CI
+  await page.mouse.move(0, 0);
   await listPage.waitForReady();
+  // Wait for any in-flight Supabase Realtime sync triggered by the delete
+  await listPage.waitForSyncSettled();
+  // On slower CI runners, Supabase Realtime + sync completion can briefly
+  // trigger a ghost-navigation away from "/". Re-anchor if needed.
+  if (!(page.url().endsWith("/") || page.url() === "http://localhost:5173")) {
+    await listPage.goto();
+    await listPage.waitForReady();
+  }
 }
 
 test.describe("soft-delete flow", () => {
